@@ -1,7 +1,6 @@
 title: Open Buro — Tech Sprint n°1
 description: Inter-App Communication via Intents & Capabilities — File Picker
 remote_theme: just-the-docs/just-the-docs
-logo: "/openburo-spec/assets/images/logo.svg"
 
 url: ""
 baseurl: "/openburo-spec"
