@@ -11,27 +11,9 @@ nav_order: 2
 
 ---
 
-```
-Client                              Service (iframe)
-  │                                      │
-  │  ── iframe load ──────────────────▷  │
-  │                                      │
-  │  ◁── { type: "intent:ready" } ─────  │  (1) Service prêt
-  │                                      │
-  │  ── { type: "intent:init",    ─────▷ │  (2) Client envoie les paramètres
-  │       action: "PICK",                │
-  │       params: { multiple: true } }   │
-  │                                      │
-  │       ... user interacts ...         │
-  │                                      │
-  │  ◁── { type: "intent:resize",  ───── │  (optionnel) Redimensionner l'iframe
-  │       height: 500 }                  │
-  │                                      │
-  │  ◁── { type: "intent:done",   ─────  │  (3) Résultat
-  │       documents: [...] }             │
-  │                                      │
-  │  ── close iframe ─────────────────▷  │  (4) Client ferme
-```
+![Protocole postMessage](protocole-postmessage.svg)
+
+*[Source éditable](protocole-postmessage.excalidraw)*
 
 **Sécurité postMessage :** Chaque message doit être validé par `event.origin` côté récepteur.
 
