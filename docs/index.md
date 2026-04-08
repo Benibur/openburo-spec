@@ -24,7 +24,8 @@ Conceptuellement, trois couches doivent intervir :
 | **Source / Capability** | Expose un service (ex. « je sais présenter un file picker ») | TDrive, Fichier DINUM                                               |
 | **Plateforme**          | Met en relation le client et la capability                   | Serveur d'intents minimal, ou configuration statique, ex Stack Cozy |
 
-Ce dossier présente les patterns existants, une comparaison des implémentations, et des scénario possibles pour articuler ces 3 couches pendant le hackathon.
+
+=> **Ce dossier présente les patterns existants, une comparaison des implémentations, et des scénario possibles pour articuler ces 3 couches pendant le hackathon.**
 
 ---
 

@@ -4,7 +4,7 @@ title: Bibliographie
 nav_order: 6
 ---
 
-# Bibliographie & art antérieur
+# Bibliographie & références
 
 [← Sujets de réflexion](sujets-ateliers.md) · [Accueil](index.md)
 
