@@ -44,6 +44,8 @@ $code-background-color: #f1f3f5;
 }
 
 .site-header {
+  height: auto !important;
+  min-height: auto !important;
   padding-bottom: 1rem !important;
 }
 
