@@ -60,12 +60,12 @@ $code-background-color: #f1f3f5;
 .aux-nav-list {
   display: flex;
   align-items: center;
-  &::before {
+  &::after {
     content: "";
     display: inline-block;
     width: 240px;
     height: 60px;
-    margin-right: 1rem;
+    margin-left: 1rem;
     background: url("../images/logo.svg") no-repeat center / contain;
   }
 }
