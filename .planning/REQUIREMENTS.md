@@ -150,80 +150,91 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation.
+Populated during roadmap creation on 2026-04-09.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase [N] | Pending |
-| FOUND-02 | Phase [N] | Pending |
-| FOUND-03 | Phase [N] | Pending |
-| FOUND-04 | Phase [N] | Pending |
-| FOUND-05 | Phase [N] | Pending |
-| FOUND-06 | Phase [N] | Pending |
-| FOUND-07 | Phase [N] | Pending |
-| REG-01 | Phase [N] | Pending |
-| REG-02 | Phase [N] | Pending |
-| REG-03 | Phase [N] | Pending |
-| REG-04 | Phase [N] | Pending |
-| REG-05 | Phase [N] | Pending |
-| REG-06 | Phase [N] | Pending |
-| REG-07 | Phase [N] | Pending |
-| REG-08 | Phase [N] | Pending |
-| CAP-01 | Phase [N] | Pending |
-| CAP-02 | Phase [N] | Pending |
-| CAP-03 | Phase [N] | Pending |
-| CAP-04 | Phase [N] | Pending |
-| CAP-05 | Phase [N] | Pending |
-| PERS-01 | Phase [N] | Pending |
-| PERS-02 | Phase [N] | Pending |
-| PERS-03 | Phase [N] | Pending |
-| PERS-04 | Phase [N] | Pending |
-| PERS-05 | Phase [N] | Pending |
-| AUTH-01 | Phase [N] | Pending |
-| AUTH-02 | Phase [N] | Pending |
-| AUTH-03 | Phase [N] | Pending |
-| AUTH-04 | Phase [N] | Pending |
-| AUTH-05 | Phase [N] | Pending |
-| API-01 | Phase [N] | Pending |
-| API-02 | Phase [N] | Pending |
-| API-03 | Phase [N] | Pending |
-| API-04 | Phase [N] | Pending |
-| API-05 | Phase [N] | Pending |
-| API-06 | Phase [N] | Pending |
-| API-07 | Phase [N] | Pending |
-| API-08 | Phase [N] | Pending |
-| API-09 | Phase [N] | Pending |
-| API-10 | Phase [N] | Pending |
-| API-11 | Phase [N] | Pending |
-| WS-01 | Phase [N] | Pending |
-| WS-02 | Phase [N] | Pending |
-| WS-03 | Phase [N] | Pending |
-| WS-04 | Phase [N] | Pending |
-| WS-05 | Phase [N] | Pending |
-| WS-06 | Phase [N] | Pending |
-| WS-07 | Phase [N] | Pending |
-| WS-08 | Phase [N] | Pending |
-| WS-09 | Phase [N] | Pending |
-| WS-10 | Phase [N] | Pending |
-| OPS-01 | Phase [N] | Pending |
-| OPS-02 | Phase [N] | Pending |
-| OPS-03 | Phase [N] | Pending |
-| OPS-04 | Phase [N] | Pending |
-| OPS-05 | Phase [N] | Pending |
-| OPS-06 | Phase [N] | Pending |
-| TEST-01 | Phase [N] | Pending |
-| TEST-02 | Phase [N] | Pending |
-| TEST-03 | Phase [N] | Pending |
-| TEST-04 | Phase [N] | Pending |
-| TEST-05 | Phase [N] | Pending |
-| TEST-06 | Phase [N] | Pending |
-| TEST-07 | Phase [N] | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Pending |
+| FOUND-07 | Phase 1 | Pending |
+| REG-01 | Phase 2 | Pending |
+| REG-02 | Phase 2 | Pending |
+| REG-03 | Phase 2 | Pending |
+| REG-04 | Phase 2 | Pending |
+| REG-05 | Phase 2 | Pending |
+| REG-06 | Phase 2 | Pending |
+| REG-07 | Phase 2 | Pending |
+| REG-08 | Phase 2 | Pending |
+| CAP-01 | Phase 2 | Pending |
+| CAP-02 | Phase 2 | Pending |
+| CAP-03 | Phase 2 | Pending |
+| CAP-04 | Phase 2 | Pending |
+| CAP-05 | Phase 2 | Pending |
+| PERS-01 | Phase 2 | Pending |
+| PERS-02 | Phase 2 | Pending |
+| PERS-03 | Phase 2 | Pending |
+| PERS-04 | Phase 2 | Pending |
+| PERS-05 | Phase 2 | Pending |
+| AUTH-01 | Phase 4 | Pending |
+| AUTH-02 | Phase 4 | Pending |
+| AUTH-03 | Phase 4 | Pending |
+| AUTH-04 | Phase 4 | Pending |
+| AUTH-05 | Phase 4 | Pending |
+| API-01 | Phase 4 | Pending |
+| API-02 | Phase 4 | Pending |
+| API-03 | Phase 4 | Pending |
+| API-04 | Phase 4 | Pending |
+| API-05 | Phase 4 | Pending |
+| API-06 | Phase 4 | Pending |
+| API-07 | Phase 4 | Pending |
+| API-08 | Phase 4 | Pending |
+| API-09 | Phase 4 | Pending |
+| API-10 | Phase 4 | Pending |
+| API-11 | Phase 4 | Pending |
+| WS-01 | Phase 4 | Pending |
+| WS-02 | Phase 3 | Pending |
+| WS-03 | Phase 3 | Pending |
+| WS-04 | Phase 3 | Pending |
+| WS-05 | Phase 4 | Pending |
+| WS-06 | Phase 4 | Pending |
+| WS-07 | Phase 3 | Pending |
+| WS-08 | Phase 4 | Pending |
+| WS-09 | Phase 4 | Pending |
+| WS-10 | Phase 3 | Pending |
+| OPS-01 | Phase 4 | Pending |
+| OPS-02 | Phase 5 | Pending |
+| OPS-03 | Phase 5 | Pending |
+| OPS-04 | Phase 5 | Pending |
+| OPS-05 | Phase 5 | Pending |
+| OPS-06 | Phase 4 | Pending |
+| TEST-01 | Phase 2 | Pending |
+| TEST-02 | Phase 4 | Pending |
+| TEST-03 | Phase 5 | Pending |
+| TEST-04 | Phase 2 | Pending |
+| TEST-05 | Phase 4 | Pending |
+| TEST-06 | Phase 4 | Pending |
+| TEST-07 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 63 total
-- Mapped to phases: 0 (filled by roadmapper)
-- Unmapped: 63 ⚠️ (will be resolved in roadmap step)
+- v1 requirements: 64 total (the header count of "63" from initial drafting was off by one — actual checkbox count is 64)
+- Mapped to phases: 64 ✓
+- Unmapped: 0
+
+**Phase Distribution:**
+
+| Phase | Requirements | Count |
+|-------|--------------|-------|
+| 1. Foundation | FOUND-01..07, TEST-07 | 8 |
+| 2. Registry Core | REG-01..08, CAP-01..05, PERS-01..05, TEST-01, TEST-04 | 20 |
+| 3. WebSocket Hub | WS-02, WS-03, WS-04, WS-07, WS-10 | 5 |
+| 4. HTTP API | AUTH-01..05, API-01..11, WS-01, WS-05, WS-06, WS-08, WS-09, OPS-01, OPS-06, TEST-02, TEST-05, TEST-06 | 26 |
+| 5. Wiring, Shutdown & Polish | OPS-02, OPS-03, OPS-04, OPS-05, TEST-03 | 5 |
+| **Total** | | **64** |
 
 ---
 *Requirements defined: 2026-04-09*
-*Last updated: 2026-04-09 after initial definition*
+*Last updated: 2026-04-09 — traceability populated by roadmapper; phase distribution finalized*
