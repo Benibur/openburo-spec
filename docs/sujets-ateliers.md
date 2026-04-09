@@ -12,34 +12,70 @@ nav_order: 5
 
 Ces questions structurent les discussions techniques du hackathon :
 
-## Sémantique de l'intent-filter / capability
+## Sémantique des capabilities dans les manifests des apps
 
 - Quels verbes d'action standardiser au-delà de `PICK` et `SAVE` ? (`VIEW`, `EDIT`, `CREATE`, `SHARE` ?)
 - Comment typer les données ? MIME types purs, types domaine (comme `io.cozy.files`), ou un vocabulaire Open Buro dédié ?
 - Faut-il supporter des catégories (comme Android) ou le couple action/type suffit-il ?
 
-## Processus de récupération des intent-filters / capability
+**Choix pour le techsprint** :
+- json
+```json
+{ 
+    id:""
+    name:""
+    url:""
+    version:""
+    capabilities:[
+        {
+            action:"PICK"
+            properties:[
+                mimeTypes:["*/*"]
+            ]
+            path:""
+        },
+        {
+            action:"SAVE",
+            properties:[
+                mimeTypes:["*/*"]
+            ],
+            path:""
+        }
+        ]
+}
+
+```
+
+## Processus de récupération des capabilities
 
 - Cache côté client ? Durée de vie ?
 - Source unique (registre plateforme) ou fédéré (chaque app expose son manifest) ?
-- Gestion du multi-intent-filter : que se passe-t-il quand 3 drives déclarent `PICK files` ?
+- Gestion du multi-capability : que se passe-t-il quand 3 drives déclarent `PICK files` ?
 - UX du chooser : l'app cliente gère-t-elle le choix, ou la plateforme fournit-elle un composant ?
 
-## Ouverture & initialisation de l'intent
+**Choix pour le techsprint** :
+* l'app cliente indique au sdk l'url où récupérer le tableau des manifest
+* `ob_sdk.init({manifests:string|obj})`
+
+## intent mangement : ouverture & initialisation de l'intent
 
 - URL complète dans le registre ou base URL + route ?
 - Paramètres passés en query string, dans le hash, ou uniquement via postMessage ?
 - iframe vs nouvel onglet vs popup ? Contraintes UX et techniques de chacun
 - Taille et positionnement de l'iframe (modale, panneau latéral, plein écran ?)
 
-## Communication client & intent-filter
+**Choix pour le techsprint** :
+* 
+* 
+
+## Communication client & capability
 
 - Protocole postMessage : quels types de messages au-delà de ready/init/done/error ?
 - Progress : le service peut-il notifier une progression (upload en cours, etc.) ?
 - Sécurité : validation d'origin, protection contre le spoofing de messages
 - Timeout : que faire si le service ne répond pas ?
 
-## Cycle de vie du front de l'intent-filter
+## Cycle de vie du front de l'capability
 
 - Le service fournit-il une UI complète ou un composant embarquable ?
 - Responsive : le front du picker doit-il s'adapter à la taille de l'iframe ?
@@ -58,7 +94,7 @@ Ces questions structurent les discussions techniques du hackathon :
 - En production : comment gérer CSP `frame-ancestors` sans tout ouvrir ?
 - La plateforme doit-elle fournir une liste blanche de domaines autorisés en iframe ? comment les connaitres ?
 - Protection contre le clickjacking quand le picker est en iframe
-- Persistent intent-filters : un intent peut-il rester ouvert (ex. sync continue, ou pour ouverture plus rapide) ?
+- Persistent capabilitys : un intent peut-il rester ouvert (ex. sync continue, ou pour ouverture plus rapide) ?
 
 ---
 
