@@ -56,20 +56,18 @@ $code-background-color: #f1f3f5;
   padding-bottom: 1rem !important;
 }
 
-// Logo dans la top barre à droite
-.main-header {
+// Logo dans la top barre à droite, avant le lien GitHub
+.aux-nav-list {
+  display: flex;
+  align-items: center;
   &::before {
     content: "";
-    display: block;
+    display: inline-block;
     width: 120px;
     height: 30px;
+    margin-right: 1rem;
     background: url("../images/logo.svg") no-repeat center / contain;
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
   }
-  position: relative;
 }
 
 .site-nav {
