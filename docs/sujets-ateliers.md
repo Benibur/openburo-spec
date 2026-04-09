@@ -67,12 +67,14 @@ Ces questions structurent les discussions techniques du hackathon :
 * les paramètres d'init sont envoyés en query string
 * iframe
 * modal avec une taille fixée
-
+```
 ?clientUrl= // pour la targetOrigin
 &id= // pour éviter des conflits sur plusieurs pickers sur plusieurs onglets qui doit être passé ensuite tous les postMessage
 &type= // , separated: permet de choisir si on veut en retour des liens ou des binaires ou les deux
 &allowedMimeType // , separated: permet de filtrer les fichiers affichées par le file picker, check mime type on mdn
 &multiple=boolean // default = false
+```
+
 
 ## Communication client & iframe
 
@@ -81,16 +83,7 @@ Ces questions structurent les discussions techniques du hackathon :
 - Timeout : que faire si le service ne répond pas ?
 
 **Choix pour le techsprint** :
-* error
-* done => done peut être appelé sans données pour juste fermer la modal
-* si loader/spinner => dans l'iframe
-* Timeout : que faire si le service ne répond pas => le client gère le onerror de l'iframe
-
-**Non priorisé**
-* init => pas besoin en paramètre en query string
-* cancel => pas vu d'usage tout de suite
-* si popup => il faut gérer du loader dans l'app et donc un init
-* progress
+* pas de communication pendant le cycle de vie autre que le init et callback final
 
 ## Callback & résultat
 
