@@ -97,14 +97,14 @@ Plans:
   4. A WebSocket handshake with a disallowed `Origin` header is rejected with 403; a handler panic is caught by the recover middleware, logged, returned as 500, and the server stays alive
   5. A dedicated test captures slog output across a failed-auth scenario and asserts no credential material (Authorization header, username, password) ever appears in any log line, and write operations emit a structured audit log line with `user`, `action`, `appId` fields
   6. `go list -deps ./internal/registry` contains no reference to `internal/wshub` — the unidirectional dependency graph is enforced by construction
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01: TBD (Server struct + route registration + middleware chain)
-- [ ] 04-02: TBD (timing-safe Basic Auth + bcrypt cost check + audit log)
-- [ ] 04-03: TBD (registry REST handlers + mutation-then-broadcast)
-- [ ] 04-04: TBD (capabilities handler + WS upgrade + full-state snapshot on connect)
-- [ ] 04-05: TBD (CORS + OriginPatterns from shared config + integration tests)
+- [ ] 04-01-server-middleware-PLAN.md — Server struct expansion, Config type, validated New (*Server, error), middleware chain (recover -> log -> cors -> mux), error envelope helpers, 501 route stubs (API-06..11)
+- [ ] 04-02-auth-credentials-PLAN.md — Credentials type + LoadCredentials (bcrypt cost >= 12), timing-safe authBasic middleware (dummyHash + subtle.ConstantTimeCompare), PII guard (AUTH-01..05, TEST-06)
+- [ ] 04-03-registry-handlers-PLAN.md — REST handlers (upsert/delete/list/get) + events.go + mutation-then-broadcast + audit log (API-01..04, WS-05, WS-09, OPS-06)
+- [ ] 04-04-capabilities-ws-PLAN.md — handleCapabilities + handleCapabilitiesWS + buildFullStateSnapshot + WS upgrade with snapshot-on-connect (API-05, WS-01, WS-06)
+- [ ] 04-05-cors-integration-tests-PLAN.md — rs/cors wiring + REST round-trip + WS round-trip + WS origin rejection + full Phase 4 gate sweep (OPS-01, WS-08, TEST-02, TEST-05, TEST-06)
 
 ### Phase 5: Wiring, Shutdown & Polish
 **Goal**: The compose-root (`cmd/server/main.go`) wiring all components under ~100 lines, a two-phase graceful shutdown that cleanly closes WebSocket connections, optional TLS, and the reference-implementation polish (examples, README, race-clean CI) that makes the binary worth reading as documentation of the OpenBuro pattern.
