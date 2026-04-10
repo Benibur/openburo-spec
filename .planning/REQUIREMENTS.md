@@ -9,12 +9,12 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Foundation
 
-- [ ] **FOUND-01**: Project builds with `go build ./...` on Go 1.26 with pinned dependencies in `go.mod`
+- [x] **FOUND-01**: Project builds with `go build ./...` on Go 1.26 with pinned dependencies in `go.mod`
 - [ ] **FOUND-02**: Configuration loaded from `config.yaml` at startup (port, TLS, credential path, registry path, WS ping interval)
 - [ ] **FOUND-03**: Structured logging via `log/slog` (JSON handler in production, text in dev) injected into all components
 - [ ] **FOUND-04**: `GET /health` endpoint returns 200 without requiring auth
 - [ ] **FOUND-05**: Startup banner log line captures version, config path, listen address, TLS state, registry path, ping interval
-- [ ] **FOUND-06**: CI pipeline runs `go test ./... -race`, `go vet`, and `gofmt` check
+- [x] **FOUND-06**: CI pipeline runs `go test ./... -race`, `go vet`, and `gofmt` check
 - [ ] **FOUND-07**: Example `config.yaml` and `credentials.yaml` files exist at repo root for quickstart
 
 ### Registry
@@ -96,7 +96,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [ ] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
 - [ ] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
 - [ ] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
-- [ ] **TEST-07**: Project follows idiomatic Go layout: `cmd/server/` + `internal/{config,registry,httpapi,wshub}/`
+- [x] **TEST-07**: Project follows idiomatic Go layout: `cmd/server/` + `internal/{config,registry,httpapi,wshub}/`
 
 ## v2 Requirements
 
@@ -154,12 +154,12 @@ Populated during roadmap creation on 2026-04-09.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
 | FOUND-05 | Phase 1 | Pending |
-| FOUND-06 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Pending |
 | REG-01 | Phase 2 | Pending |
 | REG-02 | Phase 2 | Pending |
@@ -217,7 +217,7 @@ Populated during roadmap creation on 2026-04-09.
 | TEST-04 | Phase 2 | Pending |
 | TEST-05 | Phase 4 | Pending |
 | TEST-06 | Phase 4 | Pending |
-| TEST-07 | Phase 1 | Pending |
+| TEST-07 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 64 total (the header count of "63" from initial drafting was off by one — actual checkbox count is 64)
