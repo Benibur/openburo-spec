@@ -1,7 +1,27 @@
 {
   "name": "@openburo/client",
   "version": "0.1.0",
-  "description": "Framework-agnostic browser SDK for the OpenBuro intent/capability protocol",
+  "description": "Framework-agnostic browser library for OpenBuro intent brokering — discover capabilities, pick, round-trip via sandboxed iframe.",
+  "keywords": [
+    "openburo",
+    "intent",
+    "iframe",
+    "file-picker",
+    "capability",
+    "penpal",
+    "postmessage",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openburo/openburo-spec.git",
+    "directory": "open-buro-client"
+  },
+  "homepage": "https://github.com/openburo/openburo-spec/tree/master/open-buro-client#readme",
+  "bugs": {
+    "url": "https://github.com/openburo/openburo-spec/issues"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,7 +39,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "scripts": {
