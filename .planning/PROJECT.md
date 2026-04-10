@@ -55,14 +55,22 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 
 <!-- Current scope. Building toward these. -->
 
-*(All items above validated in Phases 1–4; only Phase 5 items remain.)*
+**Wiring, Shutdown & Polish (Phase 5, shipped 2026-04-10)**
+- ✓ `cmd/server/main.go` compose-root at 99 non-blank-non-comment lines, wiring config → logger → store → credentials → hub → httpapi → http.Server — Phase 5
+- ✓ Signal-aware graceful shutdown via `signal.NotifyContext(SIGINT, SIGTERM)` — Phase 5
+- ✓ Two-phase shutdown: `httpSrv.Shutdown` drains HTTP, then `hub.Close()` sends `StatusGoingAway` to WS subscribers (PITFALLS #6) — Phase 5
+- ✓ Optional TLS via `ListenAndServeTLS` when `server.tls.enabled = true` — Phase 5
+- ✓ `TestGracefulShutdown` binds a real listener, cancels ctx, asserts clean exit within 20 s — Phase 5
+- ✓ Whole-module `go test ./... -race` green across all 5 packages (119 s) — Phase 5
+- ✓ `README.md` with Quickstart, Configuration, API Reference, Development, Architecture, Known Limitations — Phase 5
 
-**Phase 5 — Wiring, Shutdown & Polish** *(in progress)*
-- [ ] `cmd/server/main.go` compose-root under ~100 lines wiring config → store → hub → httpapi → http.Server
-- [ ] Signal-aware graceful shutdown: SIGTERM/SIGINT triggers two-phase `httpSrv.Shutdown` then `hub.Close()` (StatusGoingAway to all WS clients)
-- [ ] Optional TLS termination via `ListenAndServeTLS` when `server.tls.enabled = true`
-- [ ] Whole-module `go test ./... -race` green in CI
-- [ ] README with quickstart, example manifests, race-clean verification
+### Milestone v1.0 — COMPLETE (2026-04-10)
+
+64/64 requirements shipped and tested. Audit: `.planning/v1.0-MILESTONE-AUDIT.md` — passed. Binary ready for public demo.
+
+### Active
+
+*(Out of scope for v1.0 — tracked in REQUIREMENTS.md §v2 Requirements)*
 
 ### Out of Scope
 
@@ -116,7 +124,7 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 ---
 ## Current State
 
-Phase 4 (http-api) complete — 26/26 requirements verified, 6/6 success criteria met. Full REST + WebSocket contract implemented behind a timing-safe Basic Auth middleware with race-clean integration tests. `internal/httpapi` is the sole package that imports both `internal/registry` and `internal/wshub`; the unidirectional dependency graph is enforced by two `go list -deps` gates. Phase 5 (Wiring, Shutdown & Polish) is the final phase: it replaces the minimal `cmd/server/main.go` wiring with a full compose-root, adds two-phase graceful shutdown, optional TLS, and the README. After Phase 5 the milestone v1.0 is shippable.
+**Milestone v1.0 is COMPLETE** — 64/64 requirements shipped, 5/5 phases verified, full module race-clean. The server is feature-complete and audited. Next step is public demo deployment via ngrok, then planning milestone v2 (v2 requirements already scoped in REQUIREMENTS.md — pluggable storage, hot-reload credentials, metrics, OAuth/OIDC, event coalescing).
 
 ---
-*Last updated: 2026-04-10 after Phase 4 completion*
+*Last updated: 2026-04-10 — milestone v1.0 complete*
