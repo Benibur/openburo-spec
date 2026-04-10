@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-03-leak-test-logging-PLAN.md
-last_updated: "2026-04-10T11:46:05.796Z"
+stopped_at: Completed 04-01-server-middleware-PLAN.md
+last_updated: "2026-04-10T12:43:05.847Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 14
+  completed_plans: 10
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** A client app can discover, at any moment, which other apps can fulfill a given intent, and be notified instantly when that set changes.
-**Current focus:** Phase 03 — websocket-hub
+**Current focus:** Phase 04 — http-api
 
 ## Current Position
 
-Phase: 03 (websocket-hub) — COMPLETE (ready for `/gsd:verify-work`)
-Next: Phase 04 (http-api)
+Phase: 04 (http-api) — EXECUTING
+Plan: 2 of 5 (Plan 04-01 complete)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Next: Phase 04 (http-api)
 | Phase 03-websocket-hub P01 | 5min | 3 tasks | 5 files |
 | Phase 03-websocket-hub P02 | 8min | 2 tasks (TDD RED/GREEN) | 4 files (1 created, 3 modified) |
 | Phase 03-websocket-hub P03 | 5min | 2 tasks | 2 files |
+| Phase 04-http-api P01 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,11 @@ Recent decisions affecting current work:
 - [Phase 03-websocket-hub]: Plan 03-03: The three logging-capture tests (DropIsWarn, CloseIsInfo, NoPII) freeze the observable log contract by assertion — level=WARN, level=INFO, buffer_size field, subscribers field, exactly-one-line, 11 PII substrings forbidden — so any future refactor that changes format will fail the tests
 - [Phase 03-websocket-hub]: Plan 03-03: Zero production code changes — hub.go and subscribe.go are byte-for-byte unchanged from 03-02 commit 9a27fa8; 03-03 is a test-side + docs-side lock-in only
 - [Phase 03-websocket-hub]: Phase 3 gate sweep (.planning/phases/03-websocket-hub/03-GATES.md) all 8 gates PASS: full wshub suite (11 tests) + isolated leak test + arch isolation + no slog.Default + no time.Sleep + no TODO(03-02) + build/vet/gofmt + whole-module race-clean
+- [Phase 04-http-api]: Plan 04-01: Server.New signature locked at (logger, store, hub, creds, cfg) (*Server, error) — Credentials declared as stub struct so Plan 04-02 replaces type body without changing signature
+- [Phase 04-http-api]: Plan 04-01: Constructor validates CORS allow-list at New-time (empty, literal '*', bad path.Match pattern all return errors) because rs/cors v1.11.1 does NOT reject wildcard+credentials — fail-fast anchors PITFALLS #9
+- [Phase 04-http-api]: Plan 04-01: Middleware chain composed as recover(log(cors(mux))) in Handler() — recover is OUTERMOST so it catches panics from any inner layer; corsMiddleware is Plan 04-01 pass-through placeholder that Plan 04-05 swaps in place
+- [Phase 04-http-api]: Plan 04-01: All 6 Phase 4 routes registered with shared stub501 handler returning 501 envelope so downstream plans replace handler bodies (not route registrations) — the route table stays stable across 04-02..04-04
+- [Phase 04-http-api]: Plan 04-01: [Rule 3 deviation] cmd/server/main.go expanded from Phase 1 single-arg New to minimal 5-arg wiring to keep whole-module build green — Phase 5 will replace with full compose-root wiring (LoadCredentials, graceful shutdown, two-phase Close)
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -125,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:39:27.646Z
-Stopped at: Completed 03-03-leak-test-logging-PLAN.md
+Last session: 2026-04-10T12:43:05.845Z
+Stopped at: Completed 04-01-server-middleware-PLAN.md
 Resume file: None

@@ -59,12 +59,12 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [ ] **API-03**: `GET /api/v1/registry` returns all manifests with `{ manifests: [...], count: N }` shape
 - [ ] **API-04**: `GET /api/v1/registry/{appId}` returns one manifest or `404 Not Found`
 - [ ] **API-05**: `GET /api/v1/capabilities` returns aggregated capabilities with `{ capabilities: [...], count: N }` shape, supporting `?action=` and `?mimeType=` query params
-- [ ] **API-06**: Routes are registered using Go 1.22+ `http.ServeMux` method patterns (no third-party router)
-- [ ] **API-07**: Middleware chain wraps handlers in order: recover → log → CORS → (per-route) auth
-- [ ] **API-08**: Panic recovery middleware catches handler panics, logs them, returns `500 Internal Server Error`, and keeps the server alive
-- [ ] **API-09**: JSON responses use a consistent error envelope on 4xx/5xx (`{ "error": "...", "details": {...} }`)
-- [ ] **API-10**: Every response sets `Content-Type: application/json` where applicable
-- [ ] **API-11**: Request bodies are fully read and closed so connection reuse works correctly
+- [x] **API-06**: Routes are registered using Go 1.22+ `http.ServeMux` method patterns (no third-party router)
+- [x] **API-07**: Middleware chain wraps handlers in order: recover → log → CORS → (per-route) auth
+- [x] **API-08**: Panic recovery middleware catches handler panics, logs them, returns `500 Internal Server Error`, and keeps the server alive
+- [x] **API-09**: JSON responses use a consistent error envelope on 4xx/5xx (`{ "error": "...", "details": {...} }`)
+- [x] **API-10**: Every response sets `Content-Type: application/json` where applicable
+- [x] **API-11**: Request bodies are fully read and closed so connection reuse works correctly
 
 ### WebSocket
 
@@ -189,12 +189,12 @@ Populated during roadmap creation on 2026-04-09.
 | API-03 | Phase 4 | Pending |
 | API-04 | Phase 4 | Pending |
 | API-05 | Phase 4 | Pending |
-| API-06 | Phase 4 | Pending |
-| API-07 | Phase 4 | Pending |
-| API-08 | Phase 4 | Pending |
-| API-09 | Phase 4 | Pending |
-| API-10 | Phase 4 | Pending |
-| API-11 | Phase 4 | Pending |
+| API-06 | Phase 4 | Complete |
+| API-07 | Phase 4 | Complete |
+| API-08 | Phase 4 | Complete |
+| API-09 | Phase 4 | Complete |
+| API-10 | Phase 4 | Complete |
+| API-11 | Phase 4 | Complete |
 | WS-01 | Phase 4 | Pending |
 | WS-02 | Phase 3 | Complete |
 | WS-03 | Phase 3 | Complete |
