@@ -32,16 +32,6 @@ type Config struct {
 	WSPingInterval time.Duration
 }
 
-// Credentials is a STUB declared here so Server.New compiles in Plan 04-01.
-// Plan 04-02 replaces this with the real type (LoadCredentials, Lookup, bcrypt
-// cost verification). An empty Credentials literal is legal and causes every
-// authenticated request to return 401 once Plan 04-02's authBasic middleware
-// lands. For Plan 04-01, the users field exists solely so the struct is not
-// empty and the New signature is stable across the Plan 04-02 upgrade.
-type Credentials struct {
-	users map[string][]byte
-}
-
 // Server owns the HTTP routing, middleware chain, and handler implementations.
 // Dependencies (store, hub, credentials, logger, config) are injected by the
 // compose-root — internal packages NEVER grab global state.
