@@ -28,6 +28,19 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - ✓ Load existing `registry.json` at startup (empty/missing/valid/malformed/wrong-version/invalid-manifest/unknown-field paths) — Phase 2
 - ✓ Capability aggregation view `Store.Capabilities(filter)` with symmetric `*/*` MIME wildcard matching and deterministic sort — Phase 2
 
+**HTTP API (Phase 4, shipped 2026-04-10)**
+- ✓ REST handlers for `POST/DELETE /api/v1/registry[/{appId}]` (Basic Auth, 201/200/400/401/204/404) — Phase 4
+- ✓ Public read routes `GET /api/v1/registry`, `GET /api/v1/registry/{appId}`, `GET /api/v1/capabilities?action=&mimeType=` — Phase 4
+- ✓ `GET /api/v1/capabilities/ws` WebSocket upgrade with full-state `SNAPSHOT` on connect — Phase 4
+- ✓ `REGISTRY_UPDATED` event broadcast on every upsert/delete with `{event, timestamp, payload: {appId, change}}` shape — Phase 4
+- ✓ Timing-safe Basic Auth (bcrypt unconditional via dummyHash + `subtle.ConstantTimeCompare` tuple, PITFALLS #8) — Phase 4
+- ✓ `LoadCredentials` from `credentials.yaml` with bcrypt cost ≥ 12 enforced at load — Phase 4
+- ✓ Structured audit log on writes (`user`, `action`, `appId`) with zero PII — Phase 4
+- ✓ Middleware chain: recover → log → CORS → per-route auth; handler panics caught, server stays alive — Phase 4
+- ✓ `rs/cors` middleware with config-driven allow-list, shared with WebSocket `OriginPatterns` — Phase 4
+- ✓ Error envelope `{error, details}` on all 4xx/5xx responses — Phase 4
+- ✓ 70 httpapi tests + full REST/WS round-trip via `httptest.NewServer`, race-clean — Phase 4
+
 **WebSocket Hub (Phase 3, shipped 2026-04-10)**
 - ✓ Leak-free `internal/wshub` hub on `coder/websocket` v1.8.14 with `Hub` + `subscriber` + buffered outbound channel (default 16) — Phase 3
 - ✓ Non-blocking `Publish([]byte)` fan-out with drop-slow-consumer via `StatusPolicyViolation` — Phase 3
@@ -42,37 +55,14 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 
 <!-- Current scope. Building toward these. -->
 
-**Registry CRUD** *(business logic in place — Phase 4 adds HTTP layer)*
-- [ ] Upsert an app manifest via `POST /api/v1/registry` (Basic Auth, returns 201/200)
-- [ ] Delete an app manifest via `DELETE /api/v1/registry/{appId}` (Basic Auth, returns 204/404)
-- [ ] List all manifests via `GET /api/v1/registry` (public)
-- [ ] Fetch a single manifest via `GET /api/v1/registry/{appId}` (public)
+*(All items above validated in Phases 1–4; only Phase 5 items remain.)*
 
-**Capabilities aggregation** *(core view implemented — Phase 4 adds HTTP handler)*
-- [ ] Aggregate all capabilities across manifests via `GET /api/v1/capabilities`
-- [ ] Filter capabilities by `action` query param
-- [ ] Filter capabilities by `mimeType` query param with `*/*` wildcard matching
-
-**Real-time notifications** *(hub shipped in Phase 3 — Phase 4 adds HTTP upgrade + broadcast-on-mutation wiring)*
-- [ ] WebSocket endpoint `GET /api/v1/capabilities/ws` broadcasts `REGISTRY_UPDATED` events on any manifest change
-- ✓ WebSocket hub pattern (centralized, thread-safe fan-out to connected clients) — Phase 3
-- ✓ Periodic ping frames (configurable, default 30s) to keep connections alive — Phase 3
-
-**Authentication**
-- [ ] HTTP Basic Auth on write routes (`POST`, `DELETE`)
-- [ ] Credentials loaded from `credentials.yaml` with bcrypt-hashed passwords (cost ≥ 12)
-- [ ] Credentials never appear in logs
-
-**Persistence** *(all items validated in Phase 2 — see shipped list above)*
-
-**Configuration**
-- [ ] Optional TLS termination when `server.tls.enabled = true`
-
-**Ops**
-- [ ] CORS configured to allow browser clients (REST + WebSocket origin)
-
-**Quality**
-- [ ] Standard Go test suite: table-driven unit tests for core logic + HTTP/WS integration tests
+**Phase 5 — Wiring, Shutdown & Polish** *(in progress)*
+- [ ] `cmd/server/main.go` compose-root under ~100 lines wiring config → store → hub → httpapi → http.Server
+- [ ] Signal-aware graceful shutdown: SIGTERM/SIGINT triggers two-phase `httpSrv.Shutdown` then `hub.Close()` (StatusGoingAway to all WS clients)
+- [ ] Optional TLS termination via `ListenAndServeTLS` when `server.tls.enabled = true`
+- [ ] Whole-module `go test ./... -race` green in CI
+- [ ] README with quickstart, example manifests, race-clean verification
 
 ### Out of Scope
 
@@ -126,7 +116,7 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 ---
 ## Current State
 
-Phase 3 (websocket-hub) complete — 5/5 requirements verified, 5/5 success criteria met, 11/11 wshub tests green under `-race`. Both domain packages (`internal/registry` + `internal/wshub`) are now shipped with disjoint dependency graphs (the ABBA deadlock is structurally impossible). Phase 4 (httpapi) is unblocked: it's the sole wiring point between Registry and Hub, enforcing the unidirectional dependency graph and the mutation-then-broadcast rule.
+Phase 4 (http-api) complete — 26/26 requirements verified, 6/6 success criteria met. Full REST + WebSocket contract implemented behind a timing-safe Basic Auth middleware with race-clean integration tests. `internal/httpapi` is the sole package that imports both `internal/registry` and `internal/wshub`; the unidirectional dependency graph is enforced by two `go list -deps` gates. Phase 5 (Wiring, Shutdown & Polish) is the final phase: it replaces the minimal `cmd/server/main.go` wiring with a full compose-root, adds two-phase graceful shutdown, optional TLS, and the README. After Phase 5 the milestone v1.0 is shippable.
 
 ---
-*Last updated: 2026-04-10 after Phase 3 completion*
+*Last updated: 2026-04-10 after Phase 4 completion*
