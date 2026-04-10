@@ -77,7 +77,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
 - [ ] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
 - [ ] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
-- [ ] **WS-10**: Goroutine leak integration test: 1000 connect/disconnect cycles leave `runtime.NumGoroutine()` flat (±epsilon)
+- [x] **WS-10**: Goroutine leak integration test: 1000 connect/disconnect cycles leave `runtime.NumGoroutine()` flat (±epsilon)
 
 ### Operations
 
@@ -204,7 +204,7 @@ Populated during roadmap creation on 2026-04-09.
 | WS-07 | Phase 3 | Complete |
 | WS-08 | Phase 4 | Pending |
 | WS-09 | Phase 4 | Pending |
-| WS-10 | Phase 3 | Pending |
+| WS-10 | Phase 3 | Complete |
 | OPS-01 | Phase 4 | Pending |
 | OPS-02 | Phase 5 | Pending |
 | OPS-03 | Phase 5 | Pending |

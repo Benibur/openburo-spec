@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: Completed 03-02-publish-close-PLAN.md
-last_updated: "2026-04-10T11:27:18Z"
+status: phase-3-complete
+stopped_at: Completed 03-03-leak-test-logging-PLAN.md
+last_updated: "2026-04-10T11:39:27.648Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 03 (websocket-hub) — EXECUTING
-Plan: 3 of 3
+Phase: 03 (websocket-hub) — COMPLETE (ready for `/gsd:verify-work`)
+Next: Phase 04 (http-api)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Plan: 3 of 3
 | Phase 02-registry-core P03 | 2min | 1 (TDD RED/GREEN) tasks | 2 files files |
 | Phase 03-websocket-hub P01 | 5min | 3 tasks | 5 files |
 | Phase 03-websocket-hub P02 | 8min | 2 tasks (TDD RED/GREEN) | 4 files (1 created, 3 modified) |
+| Phase 03-websocket-hub P03 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,12 @@ Recent decisions affecting current work:
 - [Phase 03-websocket-hub]: Plan 03-02: Publish-after-Close is a silent no-op so Phase 5's two-phase shutdown can race with in-flight HTTP handlers without spurious Warn spam
 - [Phase 03-websocket-hub]: Plan 03-02: Slow-consumer and Close-GoingAway test timeouts raised from 1s to 7s to accommodate coder/websocket v1.8.14's hardcoded 5s waitCloseHandshake timeout that fires when the peer never reads (the slow-consumer simulation). This is a structural library property, not a bug — production code is byte-for-byte per plan
 - [Phase 03-websocket-hub]: Plan 03-02: TestSubscribe_PingKeepsAlive uses require.Never over 300ms (30+ ping cycles at 10ms PingInterval) as a positive-by-negative oracle — if pings silently break, the writer loop errors out and h.subscribers shrinks to 0
+- [Phase 03-websocket-hub]: Plan 03-03: Added syncBuffer (mutex-guarded bytes.Buffer wrapper) because the plan's verbatim `var buf bytes.Buffer` raced under -race — the subscriber writer goroutine logs Debug on exit while the test goroutine reads via buf.String() inside require.Eventually; plain bytes.Buffer is not concurrent-safe
+- [Phase 03-websocket-hub]: Plan 03-03: TestHub_Logging_NoPII ctx timeout raised from 3s to 15s to accommodate the 7s slow-consumer drop (same coder/websocket v1.8.14 waitCloseHandshake structural property from 03-02)
+- [Phase 03-websocket-hub]: Plan 03-03: Comment "(no time.Sleep)" reworded to "(polling, not blocking)" because the literal substring tripped the Phase 3 no-time.Sleep grep gate — third instance of Phase 3 gates tripping on their own documentation; pattern: always grep-check comments before committing gate-sensitive files
+- [Phase 03-websocket-hub]: Plan 03-03: The three logging-capture tests (DropIsWarn, CloseIsInfo, NoPII) freeze the observable log contract by assertion — level=WARN, level=INFO, buffer_size field, subscribers field, exactly-one-line, 11 PII substrings forbidden — so any future refactor that changes format will fail the tests
+- [Phase 03-websocket-hub]: Plan 03-03: Zero production code changes — hub.go and subscribe.go are byte-for-byte unchanged from 03-02 commit 9a27fa8; 03-03 is a test-side + docs-side lock-in only
+- [Phase 03-websocket-hub]: Phase 3 gate sweep (.planning/phases/03-websocket-hub/03-GATES.md) all 8 gates PASS: full wshub suite (11 tests) + isolated leak test + arch isolation + no slog.Default + no time.Sleep + no TODO(03-02) + build/vet/gofmt + whole-module race-clean
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -118,6 +125,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:27:18Z
-Stopped at: Completed 03-02-publish-close-PLAN.md
+Last session: 2026-04-10T11:39:27.646Z
+Stopped at: Completed 03-03-leak-test-logging-PLAN.md
 Resume file: None
