@@ -4,6 +4,12 @@
 interface Window {
   happyDOM: {
     setURL(url: string): void;
+    settings: {
+      navigation: {
+        disableChildFrameNavigation: boolean;
+      };
+      [key: string]: unknown;
+    };
     [key: string]: unknown;
   };
 }
