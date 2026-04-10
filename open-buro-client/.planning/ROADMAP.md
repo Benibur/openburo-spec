@@ -48,7 +48,7 @@ Plans:
 
 Plans:
 - [ ] 02-01-capabilities-PLAN.md — Pure MIME resolver, HTTPS-guarded HTTP loader with AbortSignal, WebSocket listener with full-jitter backoff + destroyed guard (Wave 1)
-- [ ] 02-02-intent-PLAN.md — Pure planCast() discriminated union + ActiveSession type for Phase 3 session Map (Wave 1)
+- [x] 02-02-intent-PLAN.md — Pure planCast() discriminated union + ActiveSession type for Phase 3 session Map (Wave 1) (completed 2026-04-10)
 - [ ] 02-03-ui-PLAN.md — Shadow DOM host + CSS reset, iframe factory with same-origin guard, Shadow-DOM-aware focus trap, chooser modal with full a11y baseline (Wave 1)
 - [ ] 02-04-messaging-PLAN.md — BridgeAdapter interface, MockBridge for tests, PenpalBridge via Penpal v7 connect + WindowMessenger (Wave 1)
 - [ ] 02-05-integration-PLAN.md — Extend public barrel, verify layer isolation, full pnpm run ci gate (Wave 2)
@@ -84,5 +84,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundations | 1/1 | Complete    | 2026-04-10 |
 | 2. Core Implementation | 5/5 | Complete    | 2026-04-10 |
-| 3. Orchestration | 0/TBD | Not started | - |
+| 3. Orchestration | 1/1 | Complete   | 2026-04-10 |
 | 4. Distribution & Quality | 0/TBD | Not started | - |
