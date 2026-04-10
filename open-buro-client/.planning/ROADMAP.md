@@ -29,7 +29,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. All shared interfaces (`Capability`, `IntentRequest`, `IntentResult`, `OBCOptions`, `CastPlan`) are exported and type-check in an isolated consumer file
   4. `generateSessionId()` returns a valid UUID v4 string when called in an environment that lacks `crypto.randomUUID()` (verified via Vitest test)
   5. `@arethetypeswrong/cli --pack` exits 0 in CI, and Penpal is pinned to an exact version in `package.json`
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 01-01-SCAFFOLD-PLAN.md — Scaffold config files, source (errors/types/id/index), tests; verify build + attw gate green
 
 ### Phase 2: Core Implementation
 **Goal**: Every independent implementation layer exists, is unit-tested, and can be composed by Phase 3 — capability loading, MIME resolution, WebSocket live updates, intent orchestration logic, iframe DOM factory, chooser modal with full a11y, and the Penpal messaging bridge are all complete
