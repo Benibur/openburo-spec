@@ -89,12 +89,12 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### Messaging Layer (Penpal)
 
-- [ ] **MSG-01**: `BridgeAdapter` interface defined; Penpal is imported only inside `messaging/penpal-bridge.ts` **[research]**
-- [ ] **MSG-02**: `PenpalBridge` uses Penpal v7 API: `connect({ messenger: new WindowMessenger({ remoteWindow, allowedOrigins }), methods })` **[research: v7 API]**
-- [ ] **MSG-03**: `allowedOrigins` restricted to `[new URL(capability.path).origin]` per session
-- [ ] **MSG-04**: Parent exposes a `resolve(result: IntentResult)` method bound to the specific session id via closure
-- [ ] **MSG-05**: `MockBridge` available for unit tests so orchestrator tests run without real iframes **[research]**
-- [ ] **MSG-06**: Connection torn down on iframe close, timeout, `destroy()`, and session resolve
+- [x] **MSG-01**: `BridgeAdapter` interface defined; Penpal is imported only inside `messaging/penpal-bridge.ts` **[research]**
+- [x] **MSG-02**: `PenpalBridge` uses Penpal v7 API: `connect({ messenger: new WindowMessenger({ remoteWindow, allowedOrigins }), methods })` **[research: v7 API]**
+- [x] **MSG-03**: `allowedOrigins` restricted to `[new URL(capability.path).origin]` per session
+- [x] **MSG-04**: Parent exposes a `resolve(result: IntentResult)` method bound to the specific session id via closure
+- [x] **MSG-05**: `MockBridge` available for unit tests so orchestrator tests run without real iframes **[research]**
+- [x] **MSG-06**: Connection torn down on iframe close, timeout, `destroy()`, and session resolve
 
 ### OpenBuroClient Orchestrator
 
@@ -234,12 +234,12 @@ Explicitly excluded. Documented to prevent scope creep.
 | UI-09 | Phase 2 | Pending |
 | UI-10 | Phase 2 | Pending |
 | UI-11 | Phase 2 | Pending |
-| MSG-01 | Phase 2 | Pending |
-| MSG-02 | Phase 2 | Pending |
-| MSG-03 | Phase 2 | Pending |
-| MSG-04 | Phase 2 | Pending |
-| MSG-05 | Phase 2 | Pending |
-| MSG-06 | Phase 2 | Pending |
+| MSG-01 | Phase 2 | Complete |
+| MSG-02 | Phase 2 | Complete |
+| MSG-03 | Phase 2 | Complete |
+| MSG-04 | Phase 2 | Complete |
+| MSG-05 | Phase 2 | Complete |
+| MSG-06 | Phase 2 | Complete |
 | ORCH-01 | Phase 3 | Pending |
 | ORCH-02 | Phase 3 | Pending |
 | ORCH-03 | Phase 3 | Pending |

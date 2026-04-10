@@ -1,6 +1,6 @@
 // MSG-01: This is the ONLY file in the codebase that imports from 'penpal'.
 // All other layers must depend on BridgeAdapter instead.
-import { connect, WindowMessenger } from 'penpal';
+import { connect, type Methods, WindowMessenger } from 'penpal';
 import type { BridgeAdapter, ConnectionHandle, ParentMethods } from './bridge-adapter.js';
 
 export class PenpalBridge implements BridgeAdapter {
@@ -24,9 +24,10 @@ export class PenpalBridge implements BridgeAdapter {
     });
 
     // MSG-02: Penpal v7 connect() API — NOT connectToChild
+    // Cast methods to Penpal's Methods type (which requires an index signature)
     const connection = connect<Record<string, never>>({
       messenger,
-      methods,
+      methods: methods as unknown as Methods,
       timeout: timeoutMs,
     });
 
