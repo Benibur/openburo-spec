@@ -82,17 +82,17 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 ### Operations
 
 - [x] **OPS-01**: CORS middleware (`rs/cors`) is configured from `config.yaml` with an explicit origin allow-list (no `*` when credentials are involved)
-- [ ] **OPS-02**: `cmd/server/main.go` wires all components via compose-root pattern and remains under ~100 lines
-- [ ] **OPS-03**: Signal-aware graceful shutdown: `signal.NotifyContext` listens for `SIGTERM`/`SIGINT`
-- [ ] **OPS-04**: **Two-phase shutdown**: `httpSrv.Shutdown(ctx)` first, then `hub.Close()` which sends `StatusGoingAway` close frames to every WebSocket client
-- [ ] **OPS-05**: Optional TLS termination when `server.tls.enabled = true` using `ListenAndServeTLS` with cert and key paths from config
+- [x] **OPS-02**: `cmd/server/main.go` wires all components via compose-root pattern and remains under ~100 lines
+- [x] **OPS-03**: Signal-aware graceful shutdown: `signal.NotifyContext` listens for `SIGTERM`/`SIGINT`
+- [x] **OPS-04**: **Two-phase shutdown**: `httpSrv.Shutdown(ctx)` first, then `hub.Close()` which sends `StatusGoingAway` close frames to every WebSocket client
+- [x] **OPS-05**: Optional TLS termination when `server.tls.enabled = true` using `ListenAndServeTLS` with cert and key paths from config
 - [x] **OPS-06**: Write operations emit a structured audit log line (`slog.Info("audit", "user", …, "action", …, "appId", …)`) without leaking credentials
 
 ### Testing & Quality
 
 - [x] **TEST-01**: Table-driven unit tests cover `Manifest.Validate`, `Store` mutations, and the full MIME matching matrix
 - [x] **TEST-02**: Integration tests via `httptest.NewServer` cover REST round-trips (upsert → list → delete) and WebSocket round-trips (mutation → event received within timeout)
-- [ ] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
+- [x] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
 - [x] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
 - [x] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
 - [x] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
@@ -206,14 +206,14 @@ Populated during roadmap creation on 2026-04-09.
 | WS-09 | Phase 4 | Complete |
 | WS-10 | Phase 3 | Complete |
 | OPS-01 | Phase 4 | Complete |
-| OPS-02 | Phase 5 | Pending |
-| OPS-03 | Phase 5 | Pending |
-| OPS-04 | Phase 5 | Pending |
-| OPS-05 | Phase 5 | Pending |
+| OPS-02 | Phase 5 | Complete |
+| OPS-03 | Phase 5 | Complete |
+| OPS-04 | Phase 5 | Complete |
+| OPS-05 | Phase 5 | Complete |
 | OPS-06 | Phase 4 | Complete |
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Complete |
-| TEST-03 | Phase 5 | Pending |
+| TEST-03 | Phase 5 | Complete |
 | TEST-04 | Phase 2 | Complete |
 | TEST-05 | Phase 4 | Complete |
 | TEST-06 | Phase 4 | Complete |
