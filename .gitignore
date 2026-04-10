@@ -1,0 +1,14 @@
+# Build outputs
+bin/
+*.test
+*.out
+
+# Local config (operator supplies real values)
+config.yaml
+credentials.yaml
+registry.json
+
+# IDE / OS cruft
+.idea/
+.vscode/
+.DS_Store
