@@ -72,12 +72,12 @@ Plans:
   3. A subscriber that never drains its channel is kicked without blocking any other subscriber or the publisher
   4. Active subscribers receive periodic ping frames at the configured interval (default 30s) and the connection stays open across idle periods
   5. `go list -deps ./internal/wshub` shows zero imports of `internal/registry` — the package is architecturally independent by construction
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD (Hub type + subscriber struct + Subscribe with CloseRead)
-- [ ] 03-02: TBD (Publish fan-out + drop-slow-consumer + ping loop)
-- [ ] 03-03: TBD (goroutine-leak test + slow-consumer test)
+- [ ] 03-01-hub-subscribe-PLAN.md — Hub + Options + subscriber struct + Subscribe writer loop with CloseRead + defer removeSubscriber (stub Publish/Close)
+- [ ] 03-02-publish-close-PLAN.md — Real Publish (non-blocking fan-out + drop-slow-consumer Warn log) + idempotent Close(StatusGoingAway) + ping keepalive in Subscribe tick.C branch
+- [ ] 03-03-leak-test-logging-PLAN.md — Logging contract tests (Warn-on-drop, Info-on-close, no PII) + full architectural gate sweep (WS-10 acceptance + no-registry/httpapi + no-slog.Default + no-time.Sleep)
 
 ### Phase 4: HTTP API
 **Goal**: The transport layer (`internal/httpapi`) that wires Registry and Hub together behind the OpenBuro HTTP+WebSocket contract — the sole package where both domains meet, enforcing the unidirectional dependency graph and the mutation-then-broadcast rule that prevents the registry↔hub ABBA deadlock.
