@@ -75,13 +75,13 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
 - [x] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
 - [x] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
-- [ ] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
+- [x] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
 - [x] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
 - [x] **WS-10**: Goroutine leak integration test: 1000 connect/disconnect cycles leave `runtime.NumGoroutine()` flat (±epsilon)
 
 ### Operations
 
-- [ ] **OPS-01**: CORS middleware (`rs/cors`) is configured from `config.yaml` with an explicit origin allow-list (no `*` when credentials are involved)
+- [x] **OPS-01**: CORS middleware (`rs/cors`) is configured from `config.yaml` with an explicit origin allow-list (no `*` when credentials are involved)
 - [ ] **OPS-02**: `cmd/server/main.go` wires all components via compose-root pattern and remains under ~100 lines
 - [ ] **OPS-03**: Signal-aware graceful shutdown: `signal.NotifyContext` listens for `SIGTERM`/`SIGINT`
 - [ ] **OPS-04**: **Two-phase shutdown**: `httpSrv.Shutdown(ctx)` first, then `hub.Close()` which sends `StatusGoingAway` close frames to every WebSocket client
@@ -91,10 +91,10 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 ### Testing & Quality
 
 - [x] **TEST-01**: Table-driven unit tests cover `Manifest.Validate`, `Store` mutations, and the full MIME matching matrix
-- [ ] **TEST-02**: Integration tests via `httptest.NewServer` cover REST round-trips (upsert → list → delete) and WebSocket round-trips (mutation → event received within timeout)
+- [x] **TEST-02**: Integration tests via `httptest.NewServer` cover REST round-trips (upsert → list → delete) and WebSocket round-trips (mutation → event received within timeout)
 - [ ] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
 - [x] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
-- [ ] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
+- [x] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
 - [x] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
 - [x] **TEST-07**: Project follows idiomatic Go layout: `cmd/server/` + `internal/{config,registry,httpapi,wshub}/`
 
@@ -202,20 +202,20 @@ Populated during roadmap creation on 2026-04-09.
 | WS-05 | Phase 4 | Complete |
 | WS-06 | Phase 4 | Complete |
 | WS-07 | Phase 3 | Complete |
-| WS-08 | Phase 4 | Pending |
+| WS-08 | Phase 4 | Complete |
 | WS-09 | Phase 4 | Complete |
 | WS-10 | Phase 3 | Complete |
-| OPS-01 | Phase 4 | Pending |
+| OPS-01 | Phase 4 | Complete |
 | OPS-02 | Phase 5 | Pending |
 | OPS-03 | Phase 5 | Pending |
 | OPS-04 | Phase 5 | Pending |
 | OPS-05 | Phase 5 | Pending |
 | OPS-06 | Phase 4 | Complete |
 | TEST-01 | Phase 2 | Complete |
-| TEST-02 | Phase 4 | Pending |
+| TEST-02 | Phase 4 | Complete |
 | TEST-03 | Phase 5 | Pending |
 | TEST-04 | Phase 2 | Complete |
-| TEST-05 | Phase 4 | Pending |
+| TEST-05 | Phase 4 | Complete |
 | TEST-06 | Phase 4 | Complete |
 | TEST-07 | Phase 1 | Complete |
 

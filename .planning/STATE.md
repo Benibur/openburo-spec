@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-04-capabilities-ws-PLAN.md
-last_updated: "2026-04-10T13:37:44.045Z"
+stopped_at: Completed 04-05-cors-integration-tests-PLAN.md
+last_updated: "2026-04-10T13:53:54.884Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -23,8 +23,9 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 ## Current Position
 
-Phase: 04 (http-api) — EXECUTING
-Plan: 5 of 5 (Plans 04-01, 04-02, 04-03, 04-04 complete)
+Phase: 04 (http-api) — COMPLETE (ready for /gsd:verify-work)
+Plan: 5 of 5 complete (all plans 04-01 through 04-05 shipped)
+Next: Phase 05 (wiring-shutdown-polish) after Phase 4 verification
 
 ## Performance Metrics
 
@@ -63,6 +64,7 @@ Plan: 5 of 5 (Plans 04-01, 04-02, 04-03, 04-04 complete)
 | Phase 04-http-api P02 | 7min | 3 tasks (chore + TDD RED/GREEN) | 10 files (2 prod, 2 test, 3 fixtures, 1 modified, 2 go.mod/sum) |
 | Phase 04-http-api P03 | 7min | 2 tasks (TDD RED/GREEN) | 6 files (2 prod, 2 test, 2 modified) |
 | Phase 04-http-api P04 | 8min | 2 tasks (TDD RED/GREEN) tasks | 6 files (1 prod, 1 test, 4 modified) files |
+| Phase 04-http-api P05 | 8min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -134,6 +136,12 @@ Recent decisions affecting current work:
 - [Phase 04-http-api]: Plan 04-04: [Rule 1 deviation] statusCapturingWriter did not implement http.Hijacker, silently breaking every WebSocket upgrade since Plan 04-01. coder/websocket.Accept asserts w.(http.Hijacker) and writes 501 on failure. Fix: 15-line Hijack() shim forwarding to inner writer and promoting status to 101. Generalizable rule: ResponseWriter wrappers in middleware MUST forward http.Hijacker (and Flusher/Pusher) or they'll silently break downstream upgrade handlers
 - [Phase 04-http-api]: Plan 04-04: Snapshot-before-subscribe (WS-06) enforced both behaviorally and statically — conn.Write(snapshot) at line 17 of handleCapabilitiesWS body precedes s.hub.Subscribe(r.Context(), conn) at line 28. WS-06 ordering is mechanically auditable via awk+grep, same pattern Plan 04-03 used for mutation-then-broadcast
 - [Phase 04-http-api]: Plan 04-04: Deleted stub501 entirely; all 6 Phase 4 routes now real. `grep -c stub501 server.go → 0` is a negative invariant for Plan 04-05. The InsecureSkipVerify grep gate tripped on our own doc comments referencing the knob by name — rule: always grep-check comments before committing gate-sensitive files (4th instance across phases). Fix: reword to 'origin-skip knob'
+- [Phase 04-http-api]: Plan 04-05: Real corsMiddleware shipped — cors.New(Options{AllowedOrigins: s.cfg.AllowedOrigins, AllowCredentials: true, AllowedMethods: [GET,POST,DELETE,OPTIONS], AllowedHeaders: [Authorization, Content-Type], MaxAge: 300}).Handler(next). Shared allow-list with handleCapabilitiesWS OriginPatterns — WS-08 contract fully landed (single source of truth for REST CORS and WS origin)
+- [Phase 04-http-api]: Plan 04-05: rs/cors v1.11.1 Access-Control-Request-Headers parsing is STRICT — requires lowercase (per Fetch spec normalization) AND sorted lexicographically. Test initially sent 'Authorization,Content-Type' (stdlib canonical) which rs/cors silently dropped as 'headers not allowed'; fix was 'authorization,content-type' + comment. Browsers always send lowercase; Go stdlib-trained developers will hit this
+- [Phase 04-http-api]: Plan 04-05: WS origin-rejection test uses 'https://evil.example' (NOT ts.URL) as Origin header to defeat coder/websocket v1.8.14's strings.EqualFold(r.Host, u.Host) same-host bypass. Using ts.URL would be a false positive — request would pass even with empty OriginPatterns. Documented in test function doc-comment
+- [Phase 04-http-api]: Plan 04-05: Integration tests use httptest.NewServer(srv.Handler()), not NewRecorder. NewRecorder does not implement http.Hijacker so WS upgrades can never succeed via Recorder — the Plan 04-04 Hijacker shim bug was ONLY observable through NewServer. Convention: all WS-involving tests use NewServer
+- [Phase 04-http-api]: Plan 04-05: TestAuth_NoCredentialsInLogs upgraded in place (not sibling) — Plan 04-02 tested authBasic in isolation; Plan 04-05 drives through full chain via httptest.NewServer with 8 forbidden substrings (+anotherSecret, $2a$ bcrypt prefix, nonexistent_user). Audit log line with user=admin is ALLOWED; forbidden list is strictly credential material
+- [Phase 04-http-api]: Phase 4 COMPLETE: all 26 requirements closed (AUTH-01..05, API-01..11, WS-01/05/06/08/09, OPS-01/06, TEST-02/05/06), all 8 architectural gates green (registry/wshub isolation, no slog.Default, no time.Sleep, no InsecureSkipVerify, no internal/config import, go vet, gofmt). See .planning/phases/04-http-api/04-GATES.md. Full httpapi suite 93.7s race-clean with 70 tests
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -152,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T13:37:15.588Z
-Stopped at: Completed 04-04-capabilities-ws-PLAN.md
+Last session: 2026-04-10T13:53:15.122Z
+Stopped at: Completed 04-05-cors-integration-tests-PLAN.md
 Resume file: None
