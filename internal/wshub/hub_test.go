@@ -6,12 +6,35 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/coder/websocket"
 	"github.com/stretchr/testify/require"
 )
+
+// syncBuffer is a mutex-guarded bytes.Buffer wrapper for log capture in
+// tests. Required because slog handlers write from the Subscribe writer
+// goroutine concurrently with the test goroutine reading via String()
+// inside require.Eventually, which races a plain bytes.Buffer.
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (s *syncBuffer) Write(p []byte) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.Write(p)
+}
+
+func (s *syncBuffer) String() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.String()
+}
 
 // subscribeHandler is a minimal httptest handler that accepts a WS
 // conn and hands it to hub.Subscribe. Used by every integration test
@@ -148,4 +171,126 @@ func TestHub_Publish_AfterCloseIsNoOp(t *testing.T) {
 	require.Contains(t, out, "wshub: closing hub", "Close must log Info once")
 	require.Contains(t, out, "subscribers=0", "Close log carries subscribers count")
 	require.NotContains(t, out, "wshub: subscriber dropped", "Publish after Close must NOT fan out")
+}
+
+// piiSubstrings enumerates strings that MUST NOT appear in any wshub
+// log line. The hub is byte-oriented and has no notion of client
+// identity; logging any of these would violate the no-PII contract
+// from 03-CONTEXT.md §"Drop-subscriber logging".
+var piiSubstrings = []string{
+	"peer_addr",
+	"remote_addr",
+	"RemoteAddr",
+	"user_agent",
+	"User-Agent",
+	"authorization",
+	"Authorization",
+	"Basic ",
+	"Bearer ",
+	"username",
+	"password",
+}
+
+func requireNoPII(t *testing.T, out string) {
+	t.Helper()
+	for _, pii := range piiSubstrings {
+		require.NotContainsf(t, out, pii,
+			"no-PII contract violated: %q appeared in log output", pii)
+	}
+}
+
+func TestHub_Logging_DropIsWarn(t *testing.T) {
+	var buf syncBuffer
+	logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	hub := New(logger, Options{
+		MessageBuffer: 1,
+		PingInterval:  10 * time.Millisecond,
+	})
+	srv := httptest.NewServer(subscribeHandler(hub))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	conn, _, err := websocket.Dial(ctx, srv.URL, nil)
+	require.NoError(t, err)
+	defer conn.CloseNow()
+
+	// Slow-consumer simulation: never read from conn.
+	waitForSubscribers(t, hub, 1, time.Second)
+
+	for i := 0; i < 5; i++ {
+		hub.Publish([]byte("msg"))
+	}
+
+	// Wait for the Warn line to appear.
+	require.Eventually(t, func() bool {
+		return strings.Contains(buf.String(), "wshub: subscriber dropped (slow consumer)")
+	}, time.Second, 10*time.Millisecond, "drop Warn log never appeared")
+
+	out := buf.String()
+	require.Contains(t, out, "level=WARN", "drop log must be at Warn level")
+	require.Contains(t, out, "buffer_size=1", "drop log must carry buffer_size field")
+	requireNoPII(t, out)
+}
+
+func TestHub_Logging_CloseIsInfo(t *testing.T) {
+	var buf syncBuffer
+	logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	hub := New(logger, Options{})
+
+	hub.Close()
+
+	out := buf.String()
+	require.Contains(t, out, "wshub: closing hub", "Close must log Info")
+	require.Contains(t, out, "level=INFO", "close log must be at Info level")
+	require.Contains(t, out, "subscribers=0", "close log must carry subscribers count")
+	require.Equal(t, 1, strings.Count(out, "wshub: closing hub"),
+		"Close must log exactly one line")
+	require.NotContains(t, out, "level=WARN", "Close must not log at Warn")
+	require.NotContains(t, out, "level=ERROR", "Close must not log at Error")
+	requireNoPII(t, out)
+}
+
+func TestHub_Logging_NoPII(t *testing.T) {
+	var buf syncBuffer
+	logger := slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	hub := New(logger, Options{
+		MessageBuffer: 1,
+		PingInterval:  10 * time.Millisecond,
+	})
+	srv := httptest.NewServer(subscribeHandler(hub))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	// Full lifecycle: connect, publish (drops the slow subscriber),
+	// close the hub. The captured log buffer must contain NONE of
+	// the PII substrings across this entire flow.
+	conn, _, err := websocket.Dial(ctx, srv.URL, nil)
+	require.NoError(t, err)
+	defer conn.CloseNow()
+
+	waitForSubscribers(t, hub, 1, time.Second)
+
+	for i := 0; i < 5; i++ {
+		hub.Publish([]byte("msg"))
+	}
+
+	waitForSubscribers(t, hub, 0, 7*time.Second)
+
+	hub.Close()
+
+	// Give any deferred log writes a chance to flush via require.Eventually
+	// (no time.Sleep). The condition is immediately true on entry in the
+	// common case; the Eventually loop is just a safety margin.
+	require.Eventually(t, func() bool {
+		return strings.Contains(buf.String(), "wshub: closing hub")
+	}, time.Second, 10*time.Millisecond)
+
+	requireNoPII(t, buf.String())
 }
