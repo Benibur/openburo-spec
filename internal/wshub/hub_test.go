@@ -286,8 +286,8 @@ func TestHub_Logging_NoPII(t *testing.T) {
 	hub.Close()
 
 	// Give any deferred log writes a chance to flush via require.Eventually
-	// (no time.Sleep). The condition is immediately true on entry in the
-	// common case; the Eventually loop is just a safety margin.
+	// (polling, not blocking). The condition is immediately true on entry
+	// in the common case; the Eventually loop is just a safety margin.
 	require.Eventually(t, func() bool {
 		return strings.Contains(buf.String(), "wshub: closing hub")
 	}, time.Second, 10*time.Millisecond)
