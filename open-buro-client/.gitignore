@@ -1,0 +1,21 @@
+# Build output
+dist/
+coverage/
+
+# Dependencies
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pack artifacts (attw --pack creates these)
+*.tgz

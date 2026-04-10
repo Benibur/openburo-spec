@@ -1,0 +1,48 @@
+{
+  "name": "@openburo/client",
+  "version": "0.1.0",
+  "description": "Framework-agnostic browser SDK for the OpenBuro intent/capability protocol",
+  "type": "module",
+  "main": "./dist/obc.cjs.js",
+  "module": "./dist/obc.esm.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/obc.esm.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.cts",
+        "default": "./dist/obc.cjs.js"
+      }
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build":      "tsdown",
+    "typecheck":  "tsc --noEmit",
+    "test":       "vitest run",
+    "test:watch": "vitest",
+    "coverage":   "vitest run --coverage",
+    "lint":       "biome check .",
+    "format":     "biome format --write .",
+    "attw":       "pnpm dlx @arethetypeswrong/cli --pack",
+    "ci":         "tsc --noEmit && biome check . && vitest run && pnpm dlx @arethetypeswrong/cli --pack"
+  },
+  "dependencies": {
+    "penpal": "7.0.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.11",
+    "@vitest/coverage-v8": "^4.1.4",
+    "happy-dom": "^20.8.9",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}
