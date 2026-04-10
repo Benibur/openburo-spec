@@ -124,13 +124,17 @@ func (s *Server) registerRoutes() {
 	// Phase 1 route (unchanged)
 	s.mux.HandleFunc("GET /health", s.handleHealth)
 
-	// Phase 4 write routes (auth added in plan 04-02; 501 stubs for now)
-	s.mux.HandleFunc("POST /api/v1/registry", s.stub501)
-	s.mux.HandleFunc("DELETE /api/v1/registry/{appId}", s.stub501)
+	// Phase 4 write routes (auth required — authBasic wraps each handler)
+	s.mux.Handle("POST /api/v1/registry",
+		s.authBasic(http.HandlerFunc(s.handleRegistryUpsert)))
+	s.mux.Handle("DELETE /api/v1/registry/{appId}",
+		s.authBasic(http.HandlerFunc(s.handleRegistryDelete)))
 
 	// Phase 4 read routes (public)
-	s.mux.HandleFunc("GET /api/v1/registry", s.stub501)
-	s.mux.HandleFunc("GET /api/v1/registry/{appId}", s.stub501)
-	s.mux.HandleFunc("GET /api/v1/capabilities", s.stub501)
-	s.mux.HandleFunc("GET /api/v1/capabilities/ws", s.stub501)
+	s.mux.HandleFunc("GET /api/v1/registry", s.handleRegistryList)
+	s.mux.HandleFunc("GET /api/v1/registry/{appId}", s.handleRegistryGet)
+
+	// Phase 4 stubs replaced in later plans
+	s.mux.HandleFunc("GET /api/v1/capabilities", s.stub501)    // plan 04-04
+	s.mux.HandleFunc("GET /api/v1/capabilities/ws", s.stub501) // plan 04-04
 }

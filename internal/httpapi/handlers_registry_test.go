@@ -149,7 +149,8 @@ func TestHandleRegistryDelete_Existing(t *testing.T) {
 	require.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 	// Subsequent GET → 404
-	r, _ := ts.Client().Get(ts.URL + "/api/v1/registry/mail-app")
+	r, err := ts.Client().Get(ts.URL + "/api/v1/registry/mail-app")
+	require.NoError(t, err)
 	defer r.Body.Close()
 	require.Equal(t, http.StatusNotFound, r.StatusCode)
 }

@@ -51,7 +51,7 @@ func TestLogMiddleware_LogsOtherRoute(t *testing.T) {
 	out := buf.String()
 	require.Contains(t, out, "httpapi: request")
 	require.Contains(t, out, "path=/api/v1/registry")
-	require.Contains(t, out, "status=501")
+	require.Contains(t, out, "status=200")
 	require.Contains(t, out, "duration_ms=")
 	require.Contains(t, out, "remote=")
 }
