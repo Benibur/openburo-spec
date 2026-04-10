@@ -70,11 +70,11 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 - [ ] **WS-01**: `GET /api/v1/capabilities/ws` upgrades to WebSocket using `coder/websocket`
 - [x] **WS-02**: Centralized hub pattern: `Hub` holds subscribers map under a mutex, `subscriber` has a buffered outbound channel (default 16)
-- [ ] **WS-03**: Non-blocking fan-out: publishing to a slow subscriber whose buffer is full triggers `closeSlow` (drop the client) rather than blocking the publisher
+- [x] **WS-03**: Non-blocking fan-out: publishing to a slow subscriber whose buffer is full triggers `closeSlow` (drop the client) rather than blocking the publisher
 - [x] **WS-04**: Each subscriber calls `conn.CloseRead(ctx)` so control frames are handled and closed clients are detected (prevents goroutine leaks)
 - [ ] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
 - [ ] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
-- [ ] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
+- [x] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
 - [ ] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
 - [ ] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
 - [ ] **WS-10**: Goroutine leak integration test: 1000 connect/disconnect cycles leave `runtime.NumGoroutine()` flat (±epsilon)
@@ -197,11 +197,11 @@ Populated during roadmap creation on 2026-04-09.
 | API-11 | Phase 4 | Pending |
 | WS-01 | Phase 4 | Pending |
 | WS-02 | Phase 3 | Complete |
-| WS-03 | Phase 3 | Pending |
+| WS-03 | Phase 3 | Complete |
 | WS-04 | Phase 3 | Complete |
 | WS-05 | Phase 4 | Pending |
 | WS-06 | Phase 4 | Pending |
-| WS-07 | Phase 3 | Pending |
+| WS-07 | Phase 3 | Complete |
 | WS-08 | Phase 4 | Pending |
 | WS-09 | Phase 4 | Pending |
 | WS-10 | Phase 3 | Pending |

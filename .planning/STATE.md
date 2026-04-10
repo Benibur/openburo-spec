@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-01-hub-subscribe-PLAN.md
-last_updated: "2026-04-10T11:16:34.464Z"
+stopped_at: Completed 03-02-publish-close-PLAN.md
+last_updated: "2026-04-10T11:27:18Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 03 (websocket-hub) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Plan: 2 of 3
 | Phase 02-registry-core P02 | 3min | 2 tasks (TDD RED/GREEN) | 9 files (2 prod, 2 test, 5 fixtures) |
 | Phase 02-registry-core P03 | 2min | 1 (TDD RED/GREEN) tasks | 2 files files |
 | Phase 03-websocket-hub P01 | 5min | 3 tasks | 5 files |
+| Phase 03-websocket-hub P02 | 8min | 2 tasks (TDD RED/GREEN) | 4 files (1 created, 3 modified) |
 
 ## Accumulated Context
 
@@ -94,6 +95,11 @@ Recent decisions affecting current work:
 - [Phase 03-websocket-hub]: Plan 03-01: Hub comment reworded from 'slog.Default()' to 'global default logger' so literal substring does not trip the grep gate; semantic meaning preserved
 - [Phase 03-websocket-hub]: Plan 03-01: Publish/Close shipped as TODO(03-02) stubs; ping ticker wired with empty case body so 03-02 only fills the ping case, not the select shape
 - [Phase 03-websocket-hub]: Plan 03-01: The three PITFALLS #3 research flags (conn.CloseRead(ctx), defer h.removeSubscriber(s), defer conn.CloseNow()) land as code in the first commit of Phase 3 and are guarded by the 1000-cycle TestSubscribe_NoGoroutineLeak that passes in 0.6s under -race
+- [Phase 03-websocket-hub]: Plan 03-02: Publish uses non-blocking `select { case s.msgs <- msg: default: Warn + go s.closeSlow() }` under h.mu; the `go` keyword on closeSlow is load-bearing because conn.Close has a 5s+5s handshake budget that must NOT run under the publisher's mutex
+- [Phase 03-websocket-hub]: Plan 03-02: Hub.Close is idempotent via h.closed flag, logs Info once ("wshub: closing hub" with subscribers count), then iterates firing `go s.closeGoingAway()` off-mutex; Close does NOT clear h.subscribers (writer loops self-cleanup via defer h.removeSubscriber)
+- [Phase 03-websocket-hub]: Plan 03-02: Publish-after-Close is a silent no-op so Phase 5's two-phase shutdown can race with in-flight HTTP handlers without spurious Warn spam
+- [Phase 03-websocket-hub]: Plan 03-02: Slow-consumer and Close-GoingAway test timeouts raised from 1s to 7s to accommodate coder/websocket v1.8.14's hardcoded 5s waitCloseHandshake timeout that fires when the peer never reads (the slow-consumer simulation). This is a structural library property, not a bug — production code is byte-for-byte per plan
+- [Phase 03-websocket-hub]: Plan 03-02: TestSubscribe_PingKeepsAlive uses require.Never over 300ms (30+ ping cycles at 10ms PingInterval) as a positive-by-negative oracle — if pings silently break, the writer loop errors out and h.subscribers shrinks to 0
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -112,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:16:34.461Z
-Stopped at: Completed 03-01-hub-subscribe-PLAN.md
+Last session: 2026-04-10T11:27:18Z
+Stopped at: Completed 03-02-publish-close-PLAN.md
 Resume file: None
