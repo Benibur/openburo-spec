@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 )
@@ -79,5 +80,57 @@ func (s *Store) List() []Manifest {
 	return out
 }
 
-// Upsert and Delete are implemented in Task 2 of Plan 02-02.
+// Upsert creates the manifest if absent, fully replaces it if present.
+// The manifest is validated (and its MIME types canonicalized in place)
+// before any state change. Persists to disk before returning. On persist
+// failure, in-memory state is rolled back to pre-mutation and the
+// returned error contains the phrase "registry unchanged".
+func (s *Store) Upsert(m Manifest) error {
+	if err := m.Validate(); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Snapshot for rollback.
+	prev, existed := s.manifests[m.ID]
+
+	// Mutate.
+	s.manifests[m.ID] = m
+
+	// Persist; roll back on failure.
+	if err := s.persistLocked(); err != nil {
+		if existed {
+			s.manifests[m.ID] = prev
+		} else {
+			delete(s.manifests, m.ID)
+		}
+		return fmt.Errorf("persist failed, registry unchanged: %w", err)
+	}
+	return nil
+}
+
+// Delete removes a manifest by id and reports whether it existed.
+// A delete of a non-existent id is a no-op: returns (false, nil)
+// without touching disk. On persist failure, in-memory state is
+// rolled back and the error contains "registry unchanged".
+func (s *Store) Delete(id string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	prev, existed := s.manifests[id]
+	if !existed {
+		// Open question #5 lock: no-op, no disk write.
+		return false, nil
+	}
+
+	delete(s.manifests, id)
+
+	if err := s.persistLocked(); err != nil {
+		s.manifests[id] = prev
+		return false, fmt.Errorf("persist failed, registry unchanged: %w", err)
+	}
+	return true, nil
+}
+
 // Capabilities is implemented in Plan 02-03.
