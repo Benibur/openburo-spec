@@ -14,7 +14,12 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+**Foundation (Phase 1, shipped 2026-04-10)**
+- ✓ Load `config.yaml` at startup (port, TLS, credential file path, registry file path, WS ping interval) — Phase 1
+- ✓ `GET /health` endpoint (no auth) for liveness checks — Phase 1
+- ✓ Structured logging via `log/slog` with injected `*slog.Logger` (no `slog.Default()` in internal/) — Phase 1
+- ✓ Project structure follows idiomatic Go server layout (`cmd/server/` + `internal/{config,registry,wshub,httpapi,version}/`) — Phase 1
+- ✓ Go 1.26 build with pinned deps, `go test -race` green, `gofmt`/`vet`/`staticcheck` CI, Makefile — Phase 1
 
 ### Active
 
@@ -48,17 +53,13 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - [ ] Load existing `registry.json` at startup
 
 **Configuration**
-- [ ] Load `config.yaml` at startup (port, TLS, credential file path, registry file path, WS ping interval)
 - [ ] Optional TLS termination when `server.tls.enabled = true`
 
 **Ops**
-- [ ] `GET /health` endpoint (no auth) for liveness checks
-- [ ] Structured logging via `log/slog` (Go 1.21+) with request logging
 - [ ] CORS configured to allow browser clients (REST + WebSocket origin)
 
 **Quality**
 - [ ] Standard Go test suite: table-driven unit tests for core logic + HTTP/WS integration tests
-- [ ] Project structure follows idiomatic Go server layout (decided during planning)
 
 ### Out of Scope
 
@@ -101,7 +102,9 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 | Browser + CLI clients supported (CORS enabled) | Matches expected consumer set (web apps, curl, Go clients) | — Pending |
 | Structured logs via `log/slog`, no metrics | Sufficient for reference impl; avoids pulling in Prometheus/OTel | — Pending |
 | Standard test rigor (unit + integration, no stress) | Correctness matters; concurrency stress testing is overkill for the expected load | — Pending |
-| Project layout decided during planning | Apply idiomatic Go patterns once scope is clearer; no premature structuring | — Pending |
+| Project layout decided during planning | Apply idiomatic Go patterns once scope is clearer; no premature structuring | ✓ Good — 4-package `internal/` layout landed in Phase 1 |
+| `log/slog` injected everywhere, no `slog.Default()` in `internal/` | Structural enforcement of "credentials never logged" via a grep gate | ✓ Good — gate passing in Phase 1 |
+| GitHub Actions `@v6`/`@v6` (revised from `@v4`/`@v5`) | Node 20 EOL June 2026 | ✓ Good — CI pipeline using current majors |
 
 ---
-*Last updated: 2026-04-09 after initialization*
+*Last updated: 2026-04-10 after Phase 1 completion*
