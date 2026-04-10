@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 current_plan: 3
 status: unknown
-stopped_at: Completed 01-02-config-examples-PLAN.md
-last_updated: "2026-04-10T08:40:43.434Z"
+stopped_at: Completed 01-03-slog-health-banner-PLAN.md
+last_updated: "2026-04-10T08:49:36.579Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -54,6 +54,7 @@ Total Plans in Phase: 3
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 8min | 2 tasks | 12 files |
 | Phase 01-foundation P02 | 12min | 2 tasks | 12 files |
+| Phase 01-foundation P03 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,10 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Replaced plan's .gitkeep files with package-anchor stubs (internal/config/doc.go blank-imports yaml/v3; internal/httpapi/doc_test.go imports testify/require) so go mod tidy retains pinned direct deps
 - [Phase 01-foundation]: Deleted internal/config/doc.go anchor (Plan 01-01 blank-import) once config.go imports yaml/v3 directly
 - [Phase 01-foundation]: Followed RESEARCH Config struct skeleton verbatim; validate() fails fast with field-named errors (no silent defaults for logging.format/level)
+- [Phase 01-foundation]: newLogger lives inline in cmd/server/main.go (not in an internal/logging package) to make it physically impossible for any internal/ package to grab a global logger; injection-first slog is enforced by a cross-tree grep gate
+- [Phase 01-foundation]: Startup banner contract frozen: 10 keys (version, go_version, listen_addr, tls_enabled, config_file, credentials_file, registry_file, ping_interval, log_format, log_level) in locked order; reordering requires CONTEXT.md update
+- [Phase 01-foundation]: handleHealth deliberately does not log and does not touch r.Header — locks in the never-log-health convention that Phase 4 middleware will inherit (PITFALLS #13 credential leak prevention)
+- [Phase 01-foundation]: Go 1.22 method-prefixed ServeMux patterns (mux.HandleFunc("GET /health", ...)) — the METHOD prefix is load-bearing for automatic 405s on wrong methods
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -88,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T08:40:43.432Z
-Stopped at: Completed 01-02-config-examples-PLAN.md
+Last session: 2026-04-10T08:49:24.679Z
+Stopped at: Completed 01-03-slog-health-banner-PLAN.md
 Resume file: None

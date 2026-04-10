@@ -12,7 +12,7 @@ OpenBuro Server is a Go 1.26 single-binary capability broker: the reference impl
 
 **Parallelization:** Phases 2 and 3 can execute in parallel — their dependency graphs are disjoint (Registry imports nothing from wshub; wshub imports nothing from registry).
 
-- [ ] **Phase 1: Foundation** - Scaffolding, config/credentials loading, slog, /health, CI
+- [x] **Phase 1: Foundation** - Scaffolding, config/credentials loading, slog, /health, CI
 - [ ] **Phase 2: Registry Core** - Manifest domain, Store with atomic persistence, symmetric MIME matching *(parallel with Phase 3)*
 - [ ] **Phase 3: WebSocket Hub** - Leak-free hub with drop-slow-consumer fan-out and ping keepalive *(parallel with Phase 2)*
 - [ ] **Phase 4: HTTP API** - Routing, middleware chain, timing-safe auth, CORS, WS upgrade, mutation-then-broadcast wiring
@@ -32,9 +32,9 @@ OpenBuro Server is a Go 1.26 single-binary capability broker: the reference impl
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-scaffold-deps-ci-PLAN.md — Initialize Go module, four-package internal/ layout, Makefile, .gitignore, GitHub Actions CI
-- [ ] 01-02-config-examples-PLAN.md — internal/config package (Config types, Load, validate) + testdata fixtures + config/credentials example YAMLs
-- [ ] 01-03-slog-health-banner-PLAN.md — internal/httpapi Server + /health handler + cmd/server/main.go compose-root with injected slog logger and 10-key startup banner
+- [x] 01-01-scaffold-deps-ci-PLAN.md — Initialize Go module, four-package internal/ layout, Makefile, .gitignore, GitHub Actions CI
+- [x] 01-02-config-examples-PLAN.md — internal/config package (Config types, Load, validate) + testdata fixtures + config/credentials example YAMLs
+- [x] 01-03-slog-health-banner-PLAN.md — internal/httpapi Server + /health handler + cmd/server/main.go compose-root with injected slog logger and 10-key startup banner
 
 ### Phase 2: Registry Core
 **Goal**: A pure domain package (`internal/registry`) owning manifest validation, thread-safe in-memory state, atomic file persistence, and symmetric MIME matching — independently testable with zero transport dependencies.
@@ -135,7 +135,7 @@ Phases execute in numeric order with Phase 2 and Phase 3 eligible for parallel e
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/3 | In Progress | - |
+| 1. Foundation | 3/3 | Complete | 2026-04-10 |
 | 2. Registry Core | 0/3 | Not started | - |
 | 3. WebSocket Hub | 0/3 | Not started | - |
 | 4. HTTP API | 0/5 | Not started | - |

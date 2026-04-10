@@ -11,9 +11,9 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 - [x] **FOUND-01**: Project builds with `go build ./...` on Go 1.26 with pinned dependencies in `go.mod`
 - [x] **FOUND-02**: Configuration loaded from `config.yaml` at startup (port, TLS, credential path, registry path, WS ping interval)
-- [ ] **FOUND-03**: Structured logging via `log/slog` (JSON handler in production, text in dev) injected into all components
-- [ ] **FOUND-04**: `GET /health` endpoint returns 200 without requiring auth
-- [ ] **FOUND-05**: Startup banner log line captures version, config path, listen address, TLS state, registry path, ping interval
+- [x] **FOUND-03**: Structured logging via `log/slog` (JSON handler in production, text in dev) injected into all components
+- [x] **FOUND-04**: `GET /health` endpoint returns 200 without requiring auth
+- [x] **FOUND-05**: Startup banner log line captures version, config path, listen address, TLS state, registry path, ping interval
 - [x] **FOUND-06**: CI pipeline runs `go test ./... -race`, `go vet`, and `gofmt` check
 - [x] **FOUND-07**: Example `config.yaml` and `credentials.yaml` files exist at repo root for quickstart
 
@@ -156,9 +156,9 @@ Populated during roadmap creation on 2026-04-09.
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Complete |
 | REG-01 | Phase 2 | Pending |
