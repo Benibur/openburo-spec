@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 01-01-SCAFFOLD-PLAN.md; Phase 1 foundations complete; all 13 files delivered; pnpm run ci exits 0
-last_updated: "2026-04-10T09:40:47.548Z"
+stopped_at: Completed 02-02-intent-PLAN.md
+last_updated: "2026-04-10T10:24:53.148Z"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 6
+  completed_plans: 2
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** A host app can call `obc.castIntent(intent, cb)` once and get a fully orchestrated file-picker / file-save flow — capability discovery, user selection, sandboxed iframe lifecycle, and PostMessage round-trip — with zero framework lock-in.
-**Current focus:** Phase 01 — foundations COMPLETE; ready for Phase 02
+**Current focus:** Phase 02 — core-implementation
 
 ## Current Position
 
-Phase: 01 (foundations) — COMPLETE
-Plan: 1 of 1 — COMPLETE
+Phase: 02 (core-implementation) — EXECUTING
+Plan: 1 of 5
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Plan: 1 of 1 — COMPLETE
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 02-core-implementation P02 | 8 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Recent decisions affecting current work:
 - 01-01: biome.json rewritten to Biome 2.4.11 actual API (organizeImports → assist.actions.source; noVar removed; files.includes for ignores)
 - 01-01: OBCError.cause declared as plain property (not override) — ES2020 lib lacks Error.cause
 - 01-01: tsdown external deprecated → use deps.neverBundle for penpal externalization
+- [Phase 02-core-implementation]: 02-02: bridge-adapter.ts already committed by Plan 02-04 when session.ts was written — real import type used, no placeholder needed
+- [Phase 02-core-implementation]: 02-02: Biome quoteStyle enforces single quotes (not double) — plan docs were inaccurate, Biome config takes precedence
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-10
-Stopped at: Completed 01-01-SCAFFOLD-PLAN.md; Phase 1 foundations complete; all 13 files delivered; pnpm run ci exits 0
+Last session: 2026-04-10T10:24:53.146Z
+Stopped at: Completed 02-02-intent-PLAN.md
 Resume file: None

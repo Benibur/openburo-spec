@@ -36,7 +36,7 @@ Requirements flagged **[research]** were added after the research phase surfaced
 - [ ] **RES-04**: Match rule: `C.properties.mimeTypes` contains `*/*` matches any mime
 - [ ] **RES-05**: Match rule: exact mime string match
 - [ ] **RES-06**: Match rule: `I.args.allowedMimeType === '*/*'` matches any capability
-- [ ] **RES-07**: Pure `planCast()` function returns `CastPlan` discriminated union (`no-match` | `direct` | `select`) — unit-testable without DOM **[research]**
+- [x] **RES-07**: Pure `planCast()` function returns `CastPlan` discriminated union (`no-match` | `direct` | `select`) — unit-testable without DOM **[research]**
 
 ### WebSocket Live Updates
 
@@ -50,15 +50,15 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### Intent Orchestration
 
-- [ ] **INT-01**: `castIntent(intent, callback)` returns a Promise and fires the callback exactly once per session
-- [ ] **INT-02**: Zero matches → callback `{ status: 'cancel', id, results: [] }` + `onError({ code: 'NO_MATCHING_CAPABILITY' })`
-- [ ] **INT-03**: One match → open iframe directly, skip modal
-- [ ] **INT-04**: Multiple matches → show chooser modal
-- [ ] **INT-05**: Each session generates a unique UUID v4 and is tracked in an internal `Map<string, ActiveSession>`
-- [ ] **INT-06**: Multiple concurrent sessions are isolated — results route to the correct callback even with overlapping iframes
-- [ ] **INT-07**: Modal cancel button returns `{ status: 'cancel', id, results: [] }`
-- [ ] **INT-08**: Timeout watchdog (default 5 min, configurable) closes the iframe and emits `OBCError { code: 'IFRAME_TIMEOUT' }`
-- [ ] **INT-09**: Messages with unknown/stale session `id` are silently ignored **[research]**
+- [x] **INT-01**: `castIntent(intent, callback)` returns a Promise and fires the callback exactly once per session
+- [x] **INT-02**: Zero matches → callback `{ status: 'cancel', id, results: [] }` + `onError({ code: 'NO_MATCHING_CAPABILITY' })`
+- [x] **INT-03**: One match → open iframe directly, skip modal
+- [x] **INT-04**: Multiple matches → show chooser modal
+- [x] **INT-05**: Each session generates a unique UUID v4 and is tracked in an internal `Map<string, ActiveSession>`
+- [x] **INT-06**: Multiple concurrent sessions are isolated — results route to the correct callback even with overlapping iframes
+- [x] **INT-07**: Modal cancel button returns `{ status: 'cancel', id, results: [] }`
+- [x] **INT-08**: Timeout watchdog (default 5 min, configurable) closes the iframe and emits `OBCError { code: 'IFRAME_TIMEOUT' }`
+- [x] **INT-09**: Messages with unknown/stale session `id` are silently ignored **[research]**
 
 ### Iframe Lifecycle
 
@@ -196,7 +196,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | RES-04 | Phase 2 | Pending |
 | RES-05 | Phase 2 | Pending |
 | RES-06 | Phase 2 | Pending |
-| RES-07 | Phase 2 | Pending |
+| RES-07 | Phase 2 | Complete |
 | WS-01 | Phase 2 | Pending |
 | WS-02 | Phase 2 | Pending |
 | WS-03 | Phase 2 | Pending |
@@ -204,15 +204,15 @@ Explicitly excluded. Documented to prevent scope creep.
 | WS-05 | Phase 2 | Pending |
 | WS-06 | Phase 2 | Pending |
 | WS-07 | Phase 2 | Pending |
-| INT-01 | Phase 2 | Pending |
-| INT-02 | Phase 2 | Pending |
-| INT-03 | Phase 2 | Pending |
-| INT-04 | Phase 2 | Pending |
-| INT-05 | Phase 2 | Pending |
-| INT-06 | Phase 2 | Pending |
-| INT-07 | Phase 2 | Pending |
-| INT-08 | Phase 2 | Pending |
-| INT-09 | Phase 2 | Pending |
+| INT-01 | Phase 2 | Complete |
+| INT-02 | Phase 2 | Complete |
+| INT-03 | Phase 2 | Complete |
+| INT-04 | Phase 2 | Complete |
+| INT-05 | Phase 2 | Complete |
+| INT-06 | Phase 2 | Complete |
+| INT-07 | Phase 2 | Complete |
+| INT-08 | Phase 2 | Complete |
+| INT-09 | Phase 2 | Complete |
 | IFR-01 | Phase 2 | Pending |
 | IFR-02 | Phase 2 | Pending |
 | IFR-03 | Phase 2 | Pending |
