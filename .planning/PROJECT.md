@@ -28,6 +28,16 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - ✓ Load existing `registry.json` at startup (empty/missing/valid/malformed/wrong-version/invalid-manifest/unknown-field paths) — Phase 2
 - ✓ Capability aggregation view `Store.Capabilities(filter)` with symmetric `*/*` MIME wildcard matching and deterministic sort — Phase 2
 
+**WebSocket Hub (Phase 3, shipped 2026-04-10)**
+- ✓ Leak-free `internal/wshub` hub on `coder/websocket` v1.8.14 with `Hub` + `subscriber` + buffered outbound channel (default 16) — Phase 3
+- ✓ Non-blocking `Publish([]byte)` fan-out with drop-slow-consumer via `StatusPolicyViolation` — Phase 3
+- ✓ `Subscribe(ctx, conn)` writer loop with `conn.CloseRead(ctx)` + `defer removeSubscriber` (goroutine-leak prevention) — Phase 3
+- ✓ Periodic ping keepalive (default 30s, configurable via `Options.PingInterval`) — Phase 3
+- ✓ `Hub.Close()` sends `StatusGoingAway` close frames to every subscriber (ready for Phase 5 two-phase shutdown) — Phase 3
+- ✓ Correctness oracle: 1000-cycle goroutine-leak test against `httptest.NewServer` with `runtime.NumGoroutine()` flat ±5 — Phase 3
+- ✓ Byte-oriented contract: `wshub` does not import `internal/registry` or `internal/httpapi` (ABBA deadlock structurally impossible) — Phase 3
+- ✓ Logging contract: Warn on slow-consumer drop (no PII), Info on hub close, silent on fan-out — Phase 3
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -43,10 +53,10 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - [ ] Filter capabilities by `action` query param
 - [ ] Filter capabilities by `mimeType` query param with `*/*` wildcard matching
 
-**Real-time notifications**
+**Real-time notifications** *(hub shipped in Phase 3 — Phase 4 adds HTTP upgrade + broadcast-on-mutation wiring)*
 - [ ] WebSocket endpoint `GET /api/v1/capabilities/ws` broadcasts `REGISTRY_UPDATED` events on any manifest change
-- [ ] WebSocket hub pattern (centralized, thread-safe fan-out to connected clients)
-- [ ] Periodic ping frames (configurable, default 30s) to keep connections alive
+- ✓ WebSocket hub pattern (centralized, thread-safe fan-out to connected clients) — Phase 3
+- ✓ Periodic ping frames (configurable, default 30s) to keep connections alive — Phase 3
 
 **Authentication**
 - [ ] HTTP Basic Auth on write routes (`POST`, `DELETE`)
@@ -116,7 +126,7 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 ---
 ## Current State
 
-Phase 2 (registry-core) complete — 20/20 requirements verified, 5/5 success criteria met, race-clean. Business logic layer for Registry CRUD + Capabilities is fully in place. Phases 3 (websocket-hub) and 4 (httpapi) are unblocked; they wire the transport layer on top of the frozen `internal/registry` surface.
+Phase 3 (websocket-hub) complete — 5/5 requirements verified, 5/5 success criteria met, 11/11 wshub tests green under `-race`. Both domain packages (`internal/registry` + `internal/wshub`) are now shipped with disjoint dependency graphs (the ABBA deadlock is structurally impossible). Phase 4 (httpapi) is unblocked: it's the sole wiring point between Registry and Hub, enforcing the unidirectional dependency graph and the mutation-then-broadcast rule.
 
 ---
-*Last updated: 2026-04-10 after Phase 2 completion*
+*Last updated: 2026-04-10 after Phase 3 completion*
