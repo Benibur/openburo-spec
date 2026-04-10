@@ -19,9 +19,9 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Registry
 
-- [ ] **REG-01**: `Manifest` domain type validates required fields (`id`, `name`, `url`, `version`, non-empty `capabilities[]`)
-- [ ] **REG-02**: `capabilities[].action` is validated against the enum `PICK | SAVE`
-- [ ] **REG-03**: `capabilities[].properties.mimeTypes` must be a non-empty list; MIME strings canonicalized (lowercased, parameters stripped)
+- [x] **REG-01**: `Manifest` domain type validates required fields (`id`, `name`, `url`, `version`, non-empty `capabilities[]`)
+- [x] **REG-02**: `capabilities[].action` is validated against the enum `PICK | SAVE`
+- [x] **REG-03**: `capabilities[].properties.mimeTypes` must be a non-empty list; MIME strings canonicalized (lowercased, parameters stripped)
 - [ ] **REG-04**: In-memory `Store` guards all state with `sync.RWMutex`; mutations serialize, reads parallelize
 - [ ] **REG-05**: `Store.Upsert` creates the manifest if absent and fully replaces it if the id already exists
 - [ ] **REG-06**: `Store.Delete` removes a manifest by id and reports whether it existed
@@ -34,7 +34,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [ ] **CAP-02**: Capability results are sorted deterministically by `appName` (lowercased), with `appId`, `action`, and `path` as tiebreakers, so API responses are stable across restarts and platforms
 - [ ] **CAP-03**: Filtering by `action` returns only capabilities whose action matches the query value exactly
 - [ ] **CAP-04**: Filtering by `mimeType` supports **symmetric wildcard matching** across the full 3×3 matrix: `exact`, `type/*`, `*/*` on both the capability side and the query side
-- [ ] **CAP-05**: MIME matching is covered by an exhaustive table-driven test over every 3×3 wildcard combination plus malformed input rejection
+- [x] **CAP-05**: MIME matching is covered by an exhaustive table-driven test over every 3×3 wildcard combination plus malformed input rejection
 
 ### Persistence
 
@@ -90,7 +90,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Testing & Quality
 
-- [ ] **TEST-01**: Table-driven unit tests cover `Manifest.Validate`, `Store` mutations, and the full MIME matching matrix
+- [x] **TEST-01**: Table-driven unit tests cover `Manifest.Validate`, `Store` mutations, and the full MIME matching matrix
 - [ ] **TEST-02**: Integration tests via `httptest.NewServer` cover REST round-trips (upsert → list → delete) and WebSocket round-trips (mutation → event received within timeout)
 - [ ] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
 - [ ] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
@@ -161,9 +161,9 @@ Populated during roadmap creation on 2026-04-09.
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Complete |
-| REG-01 | Phase 2 | Pending |
-| REG-02 | Phase 2 | Pending |
-| REG-03 | Phase 2 | Pending |
+| REG-01 | Phase 2 | Complete |
+| REG-02 | Phase 2 | Complete |
+| REG-03 | Phase 2 | Complete |
 | REG-04 | Phase 2 | Pending |
 | REG-05 | Phase 2 | Pending |
 | REG-06 | Phase 2 | Pending |
@@ -173,7 +173,7 @@ Populated during roadmap creation on 2026-04-09.
 | CAP-02 | Phase 2 | Pending |
 | CAP-03 | Phase 2 | Pending |
 | CAP-04 | Phase 2 | Pending |
-| CAP-05 | Phase 2 | Pending |
+| CAP-05 | Phase 2 | Complete |
 | PERS-01 | Phase 2 | Pending |
 | PERS-02 | Phase 2 | Pending |
 | PERS-03 | Phase 2 | Pending |
@@ -211,7 +211,7 @@ Populated during roadmap creation on 2026-04-09.
 | OPS-04 | Phase 5 | Pending |
 | OPS-05 | Phase 5 | Pending |
 | OPS-06 | Phase 4 | Pending |
-| TEST-01 | Phase 2 | Pending |
+| TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Pending |
 | TEST-03 | Phase 5 | Pending |
 | TEST-04 | Phase 2 | Pending |

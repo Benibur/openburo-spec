@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 3
 status: unknown
-stopped_at: Phase 2 context gathered
-last_updated: "2026-04-10T09:11:42.338Z"
+stopped_at: Completed 02-01-manifest-mime-PLAN.md
+last_updated: "2026-04-10T09:49:42.962Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -20,13 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** A client app can discover, at any moment, which other apps can fulfill a given intent, and be notified instantly when that set changes.
-**Current focus:** Phase 01 — foundation
+**Current focus:** Phase 02 — registry-core
 
 ## Current Position
 
-Phase: 01 (foundation) — EXECUTING
-Current Plan: 3
-Total Plans in Phase: 3
+Phase: 02 (registry-core) — EXECUTING
+Plan: 2 of 3 (02-01-manifest-mime complete)
 
 ## Performance Metrics
 
@@ -55,6 +53,7 @@ Total Plans in Phase: 3
 | Phase 01-foundation P01 | 8min | 2 tasks | 12 files |
 | Phase 01-foundation P02 | 12min | 2 tasks | 12 files |
 | Phase 01-foundation P03 | 3min | 2 tasks | 4 files |
+| Phase 02-registry-core P01 | 15min | 2 tasks (TDD RED/GREEN) | 5 files (1 deleted) |
 
 ## Accumulated Context
 
@@ -75,6 +74,12 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: Startup banner contract frozen: 10 keys (version, go_version, listen_addr, tls_enabled, config_file, credentials_file, registry_file, ping_interval, log_format, log_level) in locked order; reordering requires CONTEXT.md update
 - [Phase 01-foundation]: handleHealth deliberately does not log and does not touch r.Header — locks in the never-log-health convention that Phase 4 middleware will inherit (PITFALLS #13 credential leak prevention)
 - [Phase 01-foundation]: Go 1.22 method-prefixed ServeMux patterns (mux.HandleFunc("GET /health", ...)) — the METHOD prefix is load-bearing for automatic 405s on wrong methods
+- [Phase 02-registry-core P01]: Locked Open Question 1 — sort.Strings MimeTypes at end of Validate so file representation is byte-stable across re-upserts
+- [Phase 02-registry-core P01]: Locked Open Question 2 — canonicalizer is lenient with trailing semicolons (text/plain; -> text/plain)
+- [Phase 02-registry-core P01]: Fixed two RESEARCH canonicalizer bugs: (1) strings.SplitN accepts image//png and image/png/extra — rejected via strings.Contains(parts[1], "/"); (2) strings.SplitN accepts */subtype — rejected explicitly when parts[0]=="*" && parts[1]!="*"
+- [Phase 02-registry-core P01]: Deleted internal/registry/doc.go — package doc moved into manifest.go (the face of the domain carries its own documentation; repeats the Phase 1 pattern of deleting doc.go stubs once the real code arrives)
+- [Phase 02-registry-core P01]: Manifest.Validate mutates receiver in place (canonicalizes MimeTypes, sorts alphabetically) so stored manifests carry already-canonical MIME strings and mimeMatch stays a pure comparison with no re-canonicalization cost per query
+- [Phase 02-registry-core P01]: Exported CanonicalizeMIME wrapper lands in this plan (not Phase 4) so Phase 4 has no registry-internal plumbing to worry about and Open Question 3 (malformed filter MIME -> empty result) can be implemented cleanly in Plan 02-03
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -93,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T09:11:42.334Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-registry-core/02-CONTEXT.md
+Last session: 2026-04-10T09:59:00Z
+Stopped at: Completed 02-01-manifest-mime-PLAN.md
+Resume file: .planning/phases/02-registry-core/02-02-store-persist-PLAN.md
