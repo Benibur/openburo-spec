@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-01-manifest-mime-PLAN.md
-last_updated: "2026-04-10T09:49:42.962Z"
+stopped_at: Completed 02-02-store-persist-PLAN.md
+last_updated: "2026-04-10T09:55:33Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 02 (registry-core) — EXECUTING
-Plan: 2 of 3 (02-01-manifest-mime complete)
+Plan: 3 of 3 (02-01-manifest-mime, 02-02-store-persist complete)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Plan: 2 of 3 (02-01-manifest-mime complete)
 | Phase 01-foundation P02 | 12min | 2 tasks | 12 files |
 | Phase 01-foundation P03 | 3min | 2 tasks | 4 files |
 | Phase 02-registry-core P01 | 15min | 2 tasks (TDD RED/GREEN) | 5 files (1 deleted) |
+| Phase 02-registry-core P02 | 3min | 2 tasks (TDD RED/GREEN) | 9 files (2 prod, 2 test, 5 fixtures) |
 
 ## Accumulated Context
 
@@ -80,6 +81,11 @@ Recent decisions affecting current work:
 - [Phase 02-registry-core P01]: Deleted internal/registry/doc.go — package doc moved into manifest.go (the face of the domain carries its own documentation; repeats the Phase 1 pattern of deleting doc.go stubs once the real code arrives)
 - [Phase 02-registry-core P01]: Manifest.Validate mutates receiver in place (canonicalizes MimeTypes, sorts alphabetically) so stored manifests carry already-canonical MIME strings and mimeMatch stays a pure comparison with no re-canonicalization cost per query
 - [Phase 02-registry-core P01]: Exported CanonicalizeMIME wrapper lands in this plan (not Phase 4) so Phase 4 has no registry-internal plumbing to worry about and Open Question 3 (malformed filter MIME -> empty result) can be implemented cleanly in Plan 02-03
+- [Phase 02-registry-core P02]: Locked Open Question 4 — NewStore does NOT mkdir a missing parent; the first Upsert against a path with a non-existent parent directory fails in CreateTemp, surfacing the operator error at mutation time rather than silently creating directories
+- [Phase 02-registry-core P02]: Locked Open Question 5 — Delete of non-existent id is a (false, nil) no-op with NO disk write, verified by os.Stat().ModTime() assertion in TestStore_Delete_NonExistent_NoOp
+- [Phase 02-registry-core P02]: Rollback error phrase frozen as observable contract — error.Error() MUST contain "registry unchanged" when in-memory state is consistent with disk state after a persist failure; tests assert require.Contains on this exact substring so future refactors cannot drop the contract
+- [Phase 02-registry-core P02]: persistLocked step order — CreateTemp-in-same-dir -> Encode(SetIndent 2 spaces) -> Sync (contents) -> Close -> Rename -> dir fsync (best-effort); temp file Remove deferred unconditionally so failed writes never leak .tmp-* files
+- [Phase 02-registry-core P02]: Plan 02-02 concurrency test uses List/Get readers only (Capabilities doesn't exist yet) — Plan 02-03 will add the Capabilities concurrency test using the same RWMutex so correctness transfers
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -98,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T09:59:00Z
-Stopped at: Completed 02-01-manifest-mime-PLAN.md
-Resume file: .planning/phases/02-registry-core/02-02-store-persist-PLAN.md
+Last session: 2026-04-10T09:55:33Z
+Stopped at: Completed 02-02-store-persist-PLAN.md
+Resume file: .planning/phases/02-registry-core/02-03-capabilities-PLAN.md

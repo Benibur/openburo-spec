@@ -22,11 +22,11 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **REG-01**: `Manifest` domain type validates required fields (`id`, `name`, `url`, `version`, non-empty `capabilities[]`)
 - [x] **REG-02**: `capabilities[].action` is validated against the enum `PICK | SAVE`
 - [x] **REG-03**: `capabilities[].properties.mimeTypes` must be a non-empty list; MIME strings canonicalized (lowercased, parameters stripped)
-- [ ] **REG-04**: In-memory `Store` guards all state with `sync.RWMutex`; mutations serialize, reads parallelize
-- [ ] **REG-05**: `Store.Upsert` creates the manifest if absent and fully replaces it if the id already exists
-- [ ] **REG-06**: `Store.Delete` removes a manifest by id and reports whether it existed
-- [ ] **REG-07**: `Store.Get` returns a single manifest by id or a not-found signal
-- [ ] **REG-08**: `Store.List` returns all manifests in deterministic order
+- [x] **REG-04**: In-memory `Store` guards all state with `sync.RWMutex`; mutations serialize, reads parallelize
+- [x] **REG-05**: `Store.Upsert` creates the manifest if absent and fully replaces it if the id already exists
+- [x] **REG-06**: `Store.Delete` removes a manifest by id and reports whether it existed
+- [x] **REG-07**: `Store.Get` returns a single manifest by id or a not-found signal
+- [x] **REG-08**: `Store.List` returns all manifests in deterministic order
 
 ### Capabilities
 
@@ -38,11 +38,11 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Persistence
 
-- [ ] **PERS-01**: Registry state loads from `registry.json` at startup; a missing file yields an empty registry without error
-- [ ] **PERS-02**: Each mutation persists to disk using atomic write: temp file in the **same directory**, `tmp.Sync()`, `os.Rename`, directory fsync
-- [ ] **PERS-03**: If persistence fails, the in-memory registry rolls back to the pre-mutation snapshot and the mutation returns an error
-- [ ] **PERS-04**: Corrupted `registry.json` at startup fails fast with a clear error message (no silent data loss)
-- [ ] **PERS-05**: `registry.json` is written human-readable (indented JSON) for inspection and debugging
+- [x] **PERS-01**: Registry state loads from `registry.json` at startup; a missing file yields an empty registry without error
+- [x] **PERS-02**: Each mutation persists to disk using atomic write: temp file in the **same directory**, `tmp.Sync()`, `os.Rename`, directory fsync
+- [x] **PERS-03**: If persistence fails, the in-memory registry rolls back to the pre-mutation snapshot and the mutation returns an error
+- [x] **PERS-04**: Corrupted `registry.json` at startup fails fast with a clear error message (no silent data loss)
+- [x] **PERS-05**: `registry.json` is written human-readable (indented JSON) for inspection and debugging
 
 ### Authentication
 
@@ -93,7 +93,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **TEST-01**: Table-driven unit tests cover `Manifest.Validate`, `Store` mutations, and the full MIME matching matrix
 - [ ] **TEST-02**: Integration tests via `httptest.NewServer` cover REST round-trips (upsert → list → delete) and WebSocket round-trips (mutation → event received within timeout)
 - [ ] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
-- [ ] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
+- [x] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
 - [ ] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
 - [ ] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
 - [x] **TEST-07**: Project follows idiomatic Go layout: `cmd/server/` + `internal/{config,registry,httpapi,wshub}/`
@@ -164,21 +164,21 @@ Populated during roadmap creation on 2026-04-09.
 | REG-01 | Phase 2 | Complete |
 | REG-02 | Phase 2 | Complete |
 | REG-03 | Phase 2 | Complete |
-| REG-04 | Phase 2 | Pending |
-| REG-05 | Phase 2 | Pending |
-| REG-06 | Phase 2 | Pending |
-| REG-07 | Phase 2 | Pending |
-| REG-08 | Phase 2 | Pending |
+| REG-04 | Phase 2 | Complete |
+| REG-05 | Phase 2 | Complete |
+| REG-06 | Phase 2 | Complete |
+| REG-07 | Phase 2 | Complete |
+| REG-08 | Phase 2 | Complete |
 | CAP-01 | Phase 2 | Pending |
 | CAP-02 | Phase 2 | Pending |
 | CAP-03 | Phase 2 | Pending |
 | CAP-04 | Phase 2 | Pending |
 | CAP-05 | Phase 2 | Complete |
-| PERS-01 | Phase 2 | Pending |
-| PERS-02 | Phase 2 | Pending |
-| PERS-03 | Phase 2 | Pending |
-| PERS-04 | Phase 2 | Pending |
-| PERS-05 | Phase 2 | Pending |
+| PERS-01 | Phase 2 | Complete |
+| PERS-02 | Phase 2 | Complete |
+| PERS-03 | Phase 2 | Complete |
+| PERS-04 | Phase 2 | Complete |
+| PERS-05 | Phase 2 | Complete |
 | AUTH-01 | Phase 4 | Pending |
 | AUTH-02 | Phase 4 | Pending |
 | AUTH-03 | Phase 4 | Pending |
@@ -214,7 +214,7 @@ Populated during roadmap creation on 2026-04-09.
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Pending |
 | TEST-03 | Phase 5 | Pending |
-| TEST-04 | Phase 2 | Pending |
+| TEST-04 | Phase 2 | Complete |
 | TEST-05 | Phase 4 | Pending |
 | TEST-06 | Phase 4 | Pending |
 | TEST-07 | Phase 1 | Complete |

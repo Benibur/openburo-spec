@@ -53,8 +53,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-manifest-mime-PLAN.md — Manifest domain types + Validate + canonicalizeMIME + symmetric 3×3 mimeMatch with exhaustive tests
-- [ ] 02-02-store-persist-PLAN.md — Store mutations (Upsert/Delete/Get/List) + atomic persistence + in-memory rollback + load-at-startup
+- [x] 02-01-manifest-mime-PLAN.md — Manifest domain types + Validate + canonicalizeMIME + symmetric 3×3 mimeMatch with exhaustive tests
+- [x] 02-02-store-persist-PLAN.md — Store mutations (Upsert/Delete/Get/List) + atomic persistence + in-memory rollback + load-at-startup
 - [ ] 02-03-capabilities-PLAN.md — Store.Capabilities filter+sort (OR mimeMatch, lower(appName)/appId/action/path tiebreakers)
 
 ### Phase 3: WebSocket Hub
