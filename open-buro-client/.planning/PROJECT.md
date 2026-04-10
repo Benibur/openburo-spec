@@ -22,6 +22,13 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 - ✓ `penpal@7.0.6` pinned exact (no caret) — validated in Phase 1
 - ✓ `@arethetypeswrong/cli --pack` CI gate green across node10/node16 CJS+ESM/bundler — validated in Phase 1
 
+**Core Implementation (Phase 2)** — every independent layer built, unit-tested, composable by Phase 3. 112 tests across 15 files.
+- ✓ Capability layer: pure MIME resolver (9 tests), HTTPS-guarded HTTP loader with AbortSignal (6 tests), WebSocket listener with full-jitter backoff + `destroyed` flag guard (11 tests) — validated in Phase 2
+- ✓ Lifecycle: `createAbortContext()` helper for leak-free teardown composition (6 tests) — validated in Phase 2
+- ✓ Intent logic: pure `planCast()` discriminated union with `noUncheckedIndexedAccess` guard (8 tests), `ActiveSession` type for Phase 3 session map — validated in Phase 2
+- ✓ UI layer: Shadow DOM host (z-index on light DOM), iframe factory with same-origin guard + WCAG `title` + sandbox, Shadow-DOM-aware focus trap, chooser modal with full a11y baseline (role/aria, ESC, backdrop, arrow-keys/Home/End/Enter, focus restore, body scroll lock, 150ms spinner delay) — 41 tests — validated in Phase 2
+- ✓ Messaging layer: `BridgeAdapter` interface, `MockBridge` test double, `PenpalBridge` using verified Penpal v7 `connect({ messenger: new WindowMessenger(...) })` API — 15 tests, Penpal imported from exactly one file — validated in Phase 2
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -126,4 +133,4 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 | Library package name: `@openburo/client` | Matches ecosystem branding; scoped npm package | — Pending |
 
 ---
-*Last updated: 2026-04-10 after Phase 1 (Foundations) completion*
+*Last updated: 2026-04-10 after Phase 2 (Core Implementation) completion*
