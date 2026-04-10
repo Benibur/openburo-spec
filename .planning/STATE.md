@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 2 of 3
+current_plan: 3
 status: unknown
-stopped_at: Completed 01-01-scaffold-deps-ci-PLAN.md
-last_updated: "2026-04-10T08:34:02.583Z"
+stopped_at: Completed 01-02-config-examples-PLAN.md
+last_updated: "2026-04-10T08:40:43.434Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 01 (foundation) — EXECUTING
-Current Plan: 2 of 3
+Current Plan: 3
 Total Plans in Phase: 3
 
 ## Performance Metrics
@@ -53,6 +53,7 @@ Total Plans in Phase: 3
 
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 8min | 2 tasks | 12 files |
+| Phase 01-foundation P02 | 12min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - Phase 2 and Phase 3 are parallel-safe (disjoint dependency graphs)
 - [Phase 01-foundation]: Go 1.26.2 toolchain installed to $HOME/sdk/go1.26.2 (not system-wide) because Go 1.22 couldn't auto-fetch 1.26+ toolchains
 - [Phase 01-foundation]: Replaced plan's .gitkeep files with package-anchor stubs (internal/config/doc.go blank-imports yaml/v3; internal/httpapi/doc_test.go imports testify/require) so go mod tidy retains pinned direct deps
+- [Phase 01-foundation]: Deleted internal/config/doc.go anchor (Plan 01-01 blank-import) once config.go imports yaml/v3 directly
+- [Phase 01-foundation]: Followed RESEARCH Config struct skeleton verbatim; validate() fails fast with field-named errors (no silent defaults for logging.format/level)
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T08:34:02.581Z
-Stopped at: Completed 01-01-scaffold-deps-ci-PLAN.md
+Last session: 2026-04-10T08:40:43.432Z
+Stopped at: Completed 01-02-config-examples-PLAN.md
 Resume file: None
