@@ -50,12 +50,12 @@ Plans:
   3. If the disk write of `registry.json` fails mid-mutation, the in-memory `Store` is observably identical to its pre-mutation state and the mutation returns an error (proven by a test against an unwritable directory)
   4. Restarting the process against an existing `registry.json` yields the same `Store.List` output; a missing file yields an empty registry; a corrupted file fails fast with a clear error
   5. `Store.List` and `Store.Capabilities` return results in a deterministic order so API responses and tests are stable
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD (Manifest domain type + validation + MIME canonicalization)
-- [ ] 02-02: TBD (Store mutations with atomic persistence and rollback)
-- [ ] 02-03: TBD (Capabilities aggregation + symmetric 3×3 wildcard matching)
+- [ ] 02-01-manifest-mime-PLAN.md — Manifest domain types + Validate + canonicalizeMIME + symmetric 3×3 mimeMatch with exhaustive tests
+- [ ] 02-02-store-persist-PLAN.md — Store mutations (Upsert/Delete/Get/List) + atomic persistence + in-memory rollback + load-at-startup
+- [ ] 02-03-capabilities-PLAN.md — Store.Capabilities filter+sort (OR mimeMatch, lower(appName)/appId/action/path tiebreakers)
 
 ### Phase 3: WebSocket Hub
 **Goal**: A leak-free, byte-oriented pub/sub hub (`internal/wshub`) implementing the `coder/websocket` canonical chat pattern with non-blocking fan-out, drop-slow-consumer semantics, and periodic ping keepalive — independently testable with `httptest.NewServer` and a local client.
