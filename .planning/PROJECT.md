@@ -21,18 +21,24 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - ✓ Project structure follows idiomatic Go server layout (`cmd/server/` + `internal/{config,registry,wshub,httpapi,version}/`) — Phase 1
 - ✓ Go 1.26 build with pinned deps, `go test -race` green, `gofmt`/`vet`/`staticcheck` CI, Makefile — Phase 1
 
+**Registry Core (Phase 2, shipped 2026-04-10)**
+- ✓ In-memory `Store` with `sync.RWMutex`-protected mutations (Upsert/Delete/Get/List) — Phase 2
+- ✓ Manifest domain type + `Validate()` (required fields, `action` enum, non-empty `mimeTypes`) — Phase 2
+- ✓ Atomic JSON persistence to `registry.json` (CreateTemp→Sync→Rename→dir fsync) with in-memory rollback on persist failure — Phase 2
+- ✓ Load existing `registry.json` at startup (empty/missing/valid/malformed/wrong-version/invalid-manifest/unknown-field paths) — Phase 2
+- ✓ Capability aggregation view `Store.Capabilities(filter)` with symmetric `*/*` MIME wildcard matching and deterministic sort — Phase 2
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-**Registry CRUD**
+**Registry CRUD** *(business logic in place — Phase 4 adds HTTP layer)*
 - [ ] Upsert an app manifest via `POST /api/v1/registry` (Basic Auth, returns 201/200)
 - [ ] Delete an app manifest via `DELETE /api/v1/registry/{appId}` (Basic Auth, returns 204/404)
 - [ ] List all manifests via `GET /api/v1/registry` (public)
 - [ ] Fetch a single manifest via `GET /api/v1/registry/{appId}` (public)
-- [ ] Validate manifest payload (required fields, `action` enum, non-empty `mimeTypes`)
 
-**Capabilities aggregation**
+**Capabilities aggregation** *(core view implemented — Phase 4 adds HTTP handler)*
 - [ ] Aggregate all capabilities across manifests via `GET /api/v1/capabilities`
 - [ ] Filter capabilities by `action` query param
 - [ ] Filter capabilities by `mimeType` query param with `*/*` wildcard matching
@@ -47,10 +53,7 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 - [ ] Credentials loaded from `credentials.yaml` with bcrypt-hashed passwords (cost ≥ 12)
 - [ ] Credentials never appear in logs
 
-**Persistence**
-- [ ] In-memory registry with `sync.RWMutex`-protected mutations
-- [ ] Serialization to `registry.json` on disk after each mutation
-- [ ] Load existing `registry.json` at startup
+**Persistence** *(all items validated in Phase 2 — see shipped list above)*
 
 **Configuration**
 - [ ] Optional TLS termination when `server.tls.enabled = true`
@@ -105,6 +108,15 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 | Project layout decided during planning | Apply idiomatic Go patterns once scope is clearer; no premature structuring | ✓ Good — 4-package `internal/` layout landed in Phase 1 |
 | `log/slog` injected everywhere, no `slog.Default()` in `internal/` | Structural enforcement of "credentials never logged" via a grep gate | ✓ Good — gate passing in Phase 1 |
 | GitHub Actions `@v6`/`@v6` (revised from `@v4`/`@v5`) | Node 20 EOL June 2026 | ✓ Good — CI pipeline using current majors |
+| Symmetric `*/*` MIME wildcard matching (both sides can wildcard) | Required by CAP-05 so capability providers and requesters can each express openness | ✓ Good — `mimeMatch` + 3×3 matrix test landed in Phase 2 |
+| Persist failure → in-memory rollback (error contains `"registry unchanged"`) | Prevents divergence between disk and memory state under disk-full / permission errors | ✓ Good — `TestStore_Upsert_PersistFailureRollsBack` landed in Phase 2 |
+| `NewStore` does NOT mkdir missing parent directory | Operator error (bad config) should surface on first write, not be silently papered over | ✓ Good — Phase 2, Open Question 4 |
+| Deleting a non-existent id is `(false, nil)` no-op with no disk write | Idempotent DELETE semantics; avoids spurious persist churn on retries | ✓ Good — Phase 2, Open Question 5 |
 
 ---
-*Last updated: 2026-04-10 after Phase 1 completion*
+## Current State
+
+Phase 2 (registry-core) complete — 20/20 requirements verified, 5/5 success criteria met, race-clean. Business logic layer for Registry CRUD + Capabilities is fully in place. Phases 3 (websocket-hub) and 4 (httpapi) are unblocked; they wire the transport layer on top of the frozen `internal/registry` surface.
+
+---
+*Last updated: 2026-04-10 after Phase 2 completion*
