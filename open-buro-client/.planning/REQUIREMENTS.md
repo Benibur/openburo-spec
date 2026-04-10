@@ -1,0 +1,190 @@
+# Requirements: OpenBuroClient (OBC)
+
+**Defined:** 2026-04-10
+**Core Value:** A host app can call `obc.castIntent(intent, cb)` once and get a fully orchestrated file-picker / file-save flow — capability discovery, user selection, sandboxed iframe lifecycle, and PostMessage round-trip — with zero framework lock-in.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to a roadmap phase.
+Requirements flagged **[research]** were added after the research phase surfaced gaps in the original spec.
+
+### Foundations
+
+- [ ] **FOUND-01**: Project scaffolds with tsdown, TypeScript 6, Vitest 4, Biome, npm package name `@openburo/client`
+- [ ] **FOUND-02**: `OBCError` class exported with code + message + optional cause
+- [ ] **FOUND-03**: `OBCErrorCode` union type covers `CAPABILITIES_FETCH_FAILED`, `NO_MATCHING_CAPABILITY`, `IFRAME_TIMEOUT`, `WS_CONNECTION_FAILED`, `INTENT_CANCELLED`, and `SAME_ORIGIN_CAPABILITY` **[research]**
+- [ ] **FOUND-04**: Shared types exported: `Capability`, `IntentRequest`, `IntentResult`, `FileResult`, `IntentCallback`, `OBCOptions`, `CastPlan`
+- [ ] **FOUND-05**: `generateSessionId()` uses `crypto.randomUUID()` with inline `getRandomValues` fallback to cover Chrome 90 / Firefox 88 / Safari 14 floor **[research]**
+- [ ] **FOUND-06**: Penpal pinned to exact version (no `^` range) in `package.json` **[research]**
+- [ ] **FOUND-07**: `@arethetypeswrong/cli` runs as CI gate on every build **[research]**
+
+### Capability Loading
+
+- [ ] **CAP-01**: HTTP loader fetches capabilities from `options.capabilitiesUrl` and returns `Capability[]`
+- [ ] **CAP-02**: Loader detects OpenBuro Server via `X-OpenBuro-Server: true` response header
+- [ ] **CAP-03**: Loader errors surface as `OBCError { code: 'CAPABILITIES_FETCH_FAILED', cause }` through `onError` and a rejected `refreshCapabilities()` Promise
+- [ ] **CAP-04**: Loader accepts `AbortController.signal` so in-flight requests are cancellable from `destroy()` **[research]**
+- [ ] **CAP-05**: Loader refuses non-HTTPS `capabilitiesUrl` at runtime with a clear error (mixed-content guard) **[research]**
+- [ ] **CAP-06**: `getCapabilities()` returns the in-memory capability list synchronously
+- [ ] **CAP-07**: `refreshCapabilities()` forces an HTTP reload and returns the new list
+
+### Capability Resolution
+
+- [ ] **RES-01**: Resolver is a pure function: `(capabilities, intent) => Capability[]`
+- [ ] **RES-02**: Match rule: `C.action === I.action`
+- [ ] **RES-03**: Match rule: empty/absent `I.args.allowedMimeType` matches all
+- [ ] **RES-04**: Match rule: `C.properties.mimeTypes` contains `*/*` matches any mime
+- [ ] **RES-05**: Match rule: exact mime string match
+- [ ] **RES-06**: Match rule: `I.args.allowedMimeType === '*/*'` matches any capability
+- [ ] **RES-07**: Pure `planCast()` function returns `CastPlan` discriminated union (`no-match` | `direct` | `select`) — unit-testable without DOM **[research]**
+
+### WebSocket Live Updates
+
+- [ ] **WS-01**: When `liveUpdates` is enabled (default true when server header detected), open WebSocket to `wsUrl`
+- [ ] **WS-02**: `wsUrl` auto-derived from `capabilitiesUrl` if not provided (replace `/capabilities` with `/capabilities/ws`)
+- [ ] **WS-03**: On `REGISTRY_UPDATED` event, trigger `refreshCapabilities()` and invoke `onCapabilitiesUpdated`
+- [ ] **WS-04**: Full-jitter exponential backoff: 1s → 2s → 4s → 8s → 30s cap, max 5 attempts (configurable) **[research: jitter added]**
+- [ ] **WS-05**: Internal `destroyed` flag prevents post-`destroy()` reconnect timers from opening new sockets **[research]**
+- [ ] **WS-06**: WS failure after exhausted retries surfaces `OBCError { code: 'WS_CONNECTION_FAILED' }`
+- [ ] **WS-07**: Non-`wss://` protocol rejected at runtime to match HTTPS mixed-content policy **[research]**
+
+### Intent Orchestration
+
+- [ ] **INT-01**: `castIntent(intent, callback)` returns a Promise and fires the callback exactly once per session
+- [ ] **INT-02**: Zero matches → callback `{ status: 'cancel', id, results: [] }` + `onError({ code: 'NO_MATCHING_CAPABILITY' })`
+- [ ] **INT-03**: One match → open iframe directly, skip modal
+- [ ] **INT-04**: Multiple matches → show chooser modal
+- [ ] **INT-05**: Each session generates a unique UUID v4 and is tracked in an internal `Map<string, ActiveSession>`
+- [ ] **INT-06**: Multiple concurrent sessions are isolated — results route to the correct callback even with overlapping iframes
+- [ ] **INT-07**: Modal cancel button returns `{ status: 'cancel', id, results: [] }`
+- [ ] **INT-08**: Timeout watchdog (default 5 min, configurable) closes the iframe and emits `OBCError { code: 'IFRAME_TIMEOUT' }`
+- [ ] **INT-09**: Messages with unknown/stale session `id` are silently ignored **[research]**
+
+### Iframe Lifecycle
+
+- [ ] **IFR-01**: Iframe injected into `options.container` (default `document.body`) inside a backdrop element
+- [ ] **IFR-02**: Backdrop + iframe use configurable z-index (defaults 9000/9001)
+- [ ] **IFR-03**: Query params passed to iframe URL: `clientUrl`, `id`, `type`, `allowedMimeType`, `multiple`
+- [ ] **IFR-04**: Sandbox attribute set to `allow-scripts allow-same-origin allow-forms allow-popups`
+- [ ] **IFR-05**: `allow="clipboard-read; clipboard-write"`
+- [ ] **IFR-06**: Iframe `title` attribute set from `capability.appName` (WCAG 2.4.1, ACT cae760) **[research]**
+- [ ] **IFR-07**: Centered responsive styles: `min(90vw, 800px) × min(85vh, 600px)`, `border-radius: 8px`, subtle shadow
+- [ ] **IFR-08**: Constructor throws `OBCError { code: 'SAME_ORIGIN_CAPABILITY' }` if `new URL(capability.path).origin === location.origin` to prevent sandbox escape **[research]**
+- [ ] **IFR-09**: Loading indicator overlay shown inside host backdrop until Penpal handshake completes **[research]**
+- [ ] **IFR-10**: Body scroll lock while iframe/modal is open; restored on every close path **[research]**
+
+### Chooser Modal & Accessibility
+
+- [ ] **UI-01**: Modal lists matching capabilities with `appName` + optional icon
+- [ ] **UI-02**: Modal has a visible cancel button
+- [ ] **UI-03**: Root element has `role="dialog"` + `aria-modal="true"` + `aria-labelledby` pointing at a title node (WCAG 4.1.2) **[research]**
+- [ ] **UI-04**: ESC key dismisses modal → `cancel` callback **[research]**
+- [ ] **UI-05**: Backdrop click dismisses modal → `cancel` callback **[research]**
+- [ ] **UI-06**: Focus trap confines keyboard focus inside modal while open (WCAG 2.1.2) **[research]**
+- [ ] **UI-07**: Focus restored to the element that triggered `castIntent` on close (WCAG 2.4.3) **[research]**
+- [ ] **UI-08**: Shadow DOM (`attachShadow({ mode: 'open' })`) isolates modal styles from host CSS **[research: mode specified]**
+- [ ] **UI-09**: CSS reset inside Shadow DOM prevents host style inheritance leaks
+- [ ] **UI-10**: Capability metadata rendered via DOM APIs (`textContent`), never `innerHTML` **[research]**
+- [ ] **UI-11**: No external CSS dependencies
+
+### Messaging Layer (Penpal)
+
+- [ ] **MSG-01**: `BridgeAdapter` interface defined; Penpal is imported only inside `messaging/penpal-bridge.ts` **[research]**
+- [ ] **MSG-02**: `PenpalBridge` uses Penpal v7 API: `connect({ messenger: new WindowMessenger({ remoteWindow, allowedOrigins }), methods })` **[research: v7 API]**
+- [ ] **MSG-03**: `allowedOrigins` restricted to `[new URL(capability.path).origin]` per session
+- [ ] **MSG-04**: Parent exposes a `resolve(result: IntentResult)` method bound to the specific session id via closure
+- [ ] **MSG-05**: `MockBridge` available for unit tests so orchestrator tests run without real iframes **[research]**
+- [ ] **MSG-06**: Connection torn down on iframe close, timeout, `destroy()`, and session resolve
+
+### OpenBuroClient Orchestrator
+
+- [ ] **ORCH-01**: `new OpenBuroClient(options)` constructs an instance; constructor validates `capabilitiesUrl` is `https://`
+- [ ] **ORCH-02**: Constructor performs no async side effects; capability fetch happens on first use or explicit `refreshCapabilities()`
+- [ ] **ORCH-03**: Multiple OBC instances can exist simultaneously without cross-talk
+- [ ] **ORCH-04**: `destroy()` aborts all in-flight fetches, closes the WebSocket, tears down every Penpal connection, removes every injected DOM element, restores body scroll, and nulls session state
+- [ ] **ORCH-05**: `destroy()` uses `AbortController` as the single teardown mechanism; all listeners attach with `{ signal }` **[research]**
+- [ ] **ORCH-06**: After `destroy()`, calls to public methods throw or no-op predictably (no silent failure)
+
+### Packaging & Distribution
+
+- [ ] **PKG-01**: ESM build output `dist/obc.esm.js`
+- [ ] **PKG-02**: CommonJS build output `dist/obc.cjs.js`
+- [ ] **PKG-03**: UMD build output `dist/obc.umd.js` — importable via `<script>` from a CDN
+- [ ] **PKG-04**: TypeScript declarations published under `types/index.d.ts`
+- [ ] **PKG-05**: `package.json` `exports` map has nested `types` per condition (import/require) **[research]**
+- [ ] **PKG-06**: No global `window` pollution; UMD opt-in via `window.OpenBuroClient` only when used as `<script>`
+- [ ] **PKG-07**: Target: ES2020+; verified for Chrome 90+, Firefox 88+, Safari 14+
+- [ ] **PKG-08**: Capability-author integration guide documents required Penpal v7 compatibility **[research]**
+
+### Quality Gates
+
+- [ ] **QA-01**: Unit tests for resolver mime-matching rules (wildcard, exact, absent filter)
+- [ ] **QA-02**: Unit tests for `planCast()` discriminated union branches
+- [ ] **QA-03**: Unit tests for UUID generation and the `getRandomValues` fallback path
+- [ ] **QA-04**: Unit tests for WebSocket backoff + `destroyed` guard
+- [ ] **QA-05**: Unit tests for modal focus trap, ESC key, backdrop click
+- [ ] **QA-06**: Integration test (happy-dom + `MockBridge`): full `castIntent` happy path
+- [ ] **QA-07**: Integration test: two concurrent sessions route results to the correct callbacks
+- [ ] **QA-08**: Integration test: `destroy()` leaves zero listeners, closed WS, zero OBC DOM nodes
+- [ ] **QA-09**: Integration test: same-origin capability path rejected at cast time
+- [ ] **QA-10**: `@arethetypeswrong/cli --pack` passes in CI before publish
+
+## v2 Requirements
+
+Deferred to future releases. Tracked but not in current roadmap.
+
+### Framework Bindings
+
+- **FWK-01**: `@openburo/react` hook wrapper
+- **FWK-02**: `@openburo/vue` composable wrapper
+
+### Advanced Messaging
+
+- **MSG2-01**: Parent-to-iframe method calls beyond `resolve` (v2 extension surface)
+- **MSG2-02**: `intent:resize` dynamic iframe sizing protocol
+- **MSG2-03**: Penpal version-negotiation ping (detect v6 child, emit clearer error)
+
+### UX
+
+- **UX2-01**: CSS custom-properties theming inside Shadow DOM
+- **UX2-02**: Capability icon lazy-loading and fallback
+- **UX2-03**: Recent / preferred capability ordering in chooser
+
+### Infrastructure
+
+- **INF2-01**: Capability manifest schema versioning (`schemaVersion` field)
+- **INF2-02**: Capability caching / offline mode
+- **INF2-03**: Mobile-native SDKs
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| React/Vue/Angular bindings in core | Library must be framework-agnostic; bindings ship as separate packages in v2 |
+| Custom modal theming API | Fixed styles in v1; Shadow DOM default only |
+| OAuth / SSO between host and capability | The iframe handles its own auth; OBC is a broker, not an auth gateway |
+| Global `window.OpenBuro` singleton | Causes multi-instance conflicts; UMD `window.OpenBuroClient` is the only opt-in touchpoint |
+| Non-HTTPS `capabilitiesUrl` in production | Mixed Content is the host app's problem; rejected at runtime |
+| Capability caching / offline | Capabilities are always live; caching is v2 |
+| tsup build tooling | Deprecated in 2026; tsdown is the successor |
+| Penpal v6 `connectToChild` API | Spec pseudocode is obsolete; v7 is the only supported version |
+| Vendored Penpal source (decision: pin exact version instead) | Pinning is enough for v1; vendor only if supply-chain posture tightens |
+
+## Traceability
+
+Empty initially. Populated by gsd-roadmapper during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| (populated by roadmapper) | | Pending |
+
+**Coverage:**
+- v1 requirements: 71 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 71
+
+---
+*Requirements defined: 2026-04-10*
+*Last updated: 2026-04-10 after initial definition + research folding*
