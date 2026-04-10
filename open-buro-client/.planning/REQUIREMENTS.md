@@ -10,13 +10,13 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### Foundations
 
-- [ ] **FOUND-01**: Project scaffolds with tsdown, TypeScript 6, Vitest 4, Biome, npm package name `@openburo/client`
-- [ ] **FOUND-02**: `OBCError` class exported with code + message + optional cause
-- [ ] **FOUND-03**: `OBCErrorCode` union type covers `CAPABILITIES_FETCH_FAILED`, `NO_MATCHING_CAPABILITY`, `IFRAME_TIMEOUT`, `WS_CONNECTION_FAILED`, `INTENT_CANCELLED`, and `SAME_ORIGIN_CAPABILITY` **[research]**
-- [ ] **FOUND-04**: Shared types exported: `Capability`, `IntentRequest`, `IntentResult`, `FileResult`, `IntentCallback`, `OBCOptions`, `CastPlan`
-- [ ] **FOUND-05**: `generateSessionId()` uses `crypto.randomUUID()` with inline `getRandomValues` fallback to cover Chrome 90 / Firefox 88 / Safari 14 floor **[research]**
-- [ ] **FOUND-06**: Penpal pinned to exact version (no `^` range) in `package.json` **[research]**
-- [ ] **FOUND-07**: `@arethetypeswrong/cli` runs as CI gate on every build **[research]**
+- [x] **FOUND-01**: Project scaffolds with tsdown, TypeScript 6, Vitest 4, Biome, npm package name `@openburo/client`
+- [x] **FOUND-02**: `OBCError` class exported with code + message + optional cause
+- [x] **FOUND-03**: `OBCErrorCode` union type covers `CAPABILITIES_FETCH_FAILED`, `NO_MATCHING_CAPABILITY`, `IFRAME_TIMEOUT`, `WS_CONNECTION_FAILED`, `INTENT_CANCELLED`, and `SAME_ORIGIN_CAPABILITY` **[research]**
+- [x] **FOUND-04**: Shared types exported: `Capability`, `IntentRequest`, `IntentResult`, `FileResult`, `IntentCallback`, `OBCOptions`, `CastPlan`
+- [x] **FOUND-05**: `generateSessionId()` uses `crypto.randomUUID()` with inline `getRandomValues` fallback to cover Chrome 90 / Firefox 88 / Safari 14 floor **[research]**
+- [x] **FOUND-06**: Penpal pinned to exact version (no `^` range) in `package.json` **[research]**
+- [x] **FOUND-07**: `@arethetypeswrong/cli` runs as CI gate on every build **[research]**
 
 ### Capability Loading
 
@@ -176,13 +176,13 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
-| FOUND-06 | Phase 1 | Pending |
-| FOUND-07 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
+| FOUND-06 | Phase 1 | Complete |
+| FOUND-07 | Phase 1 | Complete |
 | CAP-01 | Phase 2 | Pending |
 | CAP-02 | Phase 2 | Pending |
 | CAP-03 | Phase 2 | Pending |
