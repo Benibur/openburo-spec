@@ -1,18 +1,25 @@
 // Command openburo-server runs the OpenBuro capability broker.
 //
-// Phase 1: loads config.yaml, constructs an injected slog logger, emits
-// a structured startup banner, and serves GET /health. Phase 5 will add
-// signal-aware graceful shutdown and two-phase WebSocket close.
+// The compose-root wires config -> logger -> registry store -> websocket
+// hub -> httpapi server -> http.Server, then blocks on a signal-aware
+// context and performs a two-phase graceful shutdown on SIGINT/SIGTERM:
+// first httpSrv.Shutdown drains in-flight HTTP requests, then hub.Close
+// sends StatusGoingAway frames to every WebSocket subscriber
+// (PITFALLS #6: http.Server.Shutdown does NOT close hijacked conns).
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"runtime"
-	"strings"
+	"syscall"
+	"time"
 
 	"github.com/openburo/openburo-server/internal/config"
 	"github.com/openburo/openburo-server/internal/httpapi"
@@ -22,99 +29,88 @@ import (
 )
 
 func main() {
-	if err := run(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	if err := run(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "fatal: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+func run(ctx context.Context) error {
 	configPath := flag.String("config", "./config.yaml", "path to config.yaml")
 	flag.Parse()
-
 	cfg, err := config.Load(*configPath)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
-
 	logger, err := newLogger(cfg.Logging.Format, cfg.Logging.Level)
 	if err != nil {
 		return fmt.Errorf("build logger: %w", err)
 	}
-
-	logger.Info("openburo server starting",
-		"version", version.Version,
-		"go_version", runtime.Version(),
-		"listen_addr", cfg.Server.Addr(),
-		"tls_enabled", cfg.Server.TLS.Enabled,
-		"config_file", *configPath,
-		"credentials_file", cfg.CredentialsFile,
-		"registry_file", cfg.RegistryFile,
-		"ping_interval", cfg.WebSocket.PingInterval.String(),
-		"log_format", cfg.Logging.Format,
-		"log_level", cfg.Logging.Level,
-	)
-
-	// Phase 4 Plan 04-01 expanded httpapi.New's signature to require the
-	// Phase 2 registry store, the Phase 3 websocket hub, a Credentials
-	// table, and a Config. Phase 5 will replace this minimal wiring with
-	// full compose-root wiring (graceful shutdown, LoadCredentials from
-	// cfg.CredentialsFile, two-phase Close). For now we construct just
-	// enough so the binary compiles and the Phase 1 /health endpoint still
-	// serves under the new middleware chain.
+	logger.Info("openburo server starting", "version", version.Version, "go", runtime.Version(), "listen", cfg.Server.Addr(), "tls", cfg.Server.TLS.Enabled, "registry", cfg.RegistryFile)
 	store, err := registry.NewStore(cfg.RegistryFile)
 	if err != nil {
 		return fmt.Errorf("load registry: %w", err)
 	}
-	hub := wshub.New(logger, wshub.Options{
-		PingInterval: cfg.WebSocket.PingInterval,
-	})
-	defer hub.Close()
-
-	srv, err := httpapi.New(logger, store, hub, httpapi.Credentials{}, httpapi.Config{
-		AllowedOrigins: cfg.CORS.AllowedOrigins,
-		WSPingInterval: cfg.WebSocket.PingInterval,
-	})
+	creds, err := httpapi.LoadCredentials(cfg.CredentialsFile)
+	if err != nil {
+		return fmt.Errorf("load credentials: %w", err)
+	}
+	hub := wshub.New(logger, wshub.Options{PingInterval: cfg.WebSocket.PingInterval})
+	srv, err := httpapi.New(logger, store, hub, creds, httpapi.Config{AllowedOrigins: cfg.CORS.AllowedOrigins, WSPingInterval: cfg.WebSocket.PingInterval})
 	if err != nil {
 		return fmt.Errorf("build httpapi server: %w", err)
 	}
-	httpSrv := &http.Server{
-		Addr:    cfg.Server.Addr(),
-		Handler: srv.Handler(),
+	httpSrv := &http.Server{Addr: cfg.Server.Addr(), Handler: srv.Handler()}
+	serveErr := make(chan error, 1)
+	go func() {
+		if cfg.Server.TLS.Enabled {
+			serveErr <- httpSrv.ListenAndServeTLS(cfg.Server.TLS.CertFile, cfg.Server.TLS.KeyFile)
+			return
+		}
+		serveErr <- httpSrv.ListenAndServe()
+	}()
+	select {
+	case err := <-serveErr:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("http serve: %w", err)
+		}
+		return nil
+	case <-ctx.Done():
+		logger.Info("server shutting down")
 	}
-	return httpSrv.ListenAndServe()
+	// Phase A: drain in-flight HTTP requests.
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	shutdownErr := httpSrv.Shutdown(shutdownCtx)
+	// Phase B: close WebSocket subscribers with StatusGoingAway (PITFALLS #6).
+	hub.Close()
+	if shutdownErr != nil {
+		return fmt.Errorf("http shutdown: %w", shutdownErr)
+	}
+	logger.Info("server stopped cleanly")
+	return nil
 }
 
-// newLogger builds a *slog.Logger from config.
-//
-// Lives inline in main.go (not in an internal/logging package) because
-// it's compose-root wiring, and because keeping it here guarantees no
-// internal/ package ever grabs a global logger behind the compose
-// root's back. See .planning/phases/01-foundation/01-RESEARCH.md
-// §Pattern 2.
+var logLevels = map[string]slog.Level{
+	"debug": slog.LevelDebug, "info": slog.LevelInfo,
+	"warn": slog.LevelWarn, "error": slog.LevelError,
+}
+
+// newLogger builds a *slog.Logger from config (no global-logger fallback).
 func newLogger(format, level string) (*slog.Logger, error) {
-	var lvl slog.Level
-	switch strings.ToLower(level) {
-	case "debug":
-		lvl = slog.LevelDebug
-	case "info":
-		lvl = slog.LevelInfo
-	case "warn":
-		lvl = slog.LevelWarn
-	case "error":
-		lvl = slog.LevelError
-	default:
+	lvl, ok := logLevels[level]
+	if !ok {
 		return nil, fmt.Errorf("invalid log level %q (want debug|info|warn|error)", level)
 	}
 	opts := &slog.HandlerOptions{Level: lvl}
-	var h slog.Handler
-	switch strings.ToLower(format) {
+	switch format {
 	case "json":
-		h = slog.NewJSONHandler(os.Stderr, opts)
+		return slog.New(slog.NewJSONHandler(os.Stderr, opts)), nil
 	case "text":
-		h = slog.NewTextHandler(os.Stderr, opts)
+		return slog.New(slog.NewTextHandler(os.Stderr, opts)), nil
 	default:
 		return nil, fmt.Errorf("invalid log format %q (want json|text)", format)
 	}
-	return slog.New(h), nil
 }
