@@ -224,3 +224,203 @@ func TestStore_Upsert_PersistFailureRollsBack(t *testing.T) {
 	got, _ = store.Get("seed-app")
 	require.Equal(t, "Seed", got.Name, "seed-app must have rolled back to original")
 }
+
+func TestStore_Capabilities(t *testing.T) {
+	// Local builder — sampleManifest only makes single-capability manifests.
+	makeManifest := func(id, name string, caps []Capability) Manifest {
+		return Manifest{
+			ID:           id,
+			Name:         name,
+			URL:          "https://example.com",
+			Version:      "1.0.0",
+			Capabilities: caps,
+		}
+	}
+	capPick := func(path string, mimes ...string) Capability {
+		return Capability{Action: "PICK", Path: path, Properties: CapabilityProps{MimeTypes: mimes}}
+	}
+	capSave := func(path string, mimes ...string) Capability {
+		return Capability{Action: "SAVE", Path: path, Properties: CapabilityProps{MimeTypes: mimes}}
+	}
+
+	t.Run("flatten", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("mail-app", "Mail", []Capability{
+			capPick("/pick", "*/*"),
+			capSave("/save", "*/*"),
+		})))
+		require.NoError(t, store.Upsert(makeManifest("viewer-app", "Viewer", []Capability{
+			capPick("/view", "image/png"),
+		})))
+
+		got := store.Capabilities(CapabilityFilter{})
+		require.Len(t, got, 3)
+
+		// Each entry has denormalized AppID + AppName.
+		for _, cv := range got {
+			require.NotEmpty(t, cv.AppID)
+			require.NotEmpty(t, cv.AppName)
+			require.NotEmpty(t, cv.Action)
+			require.NotEmpty(t, cv.Path)
+			require.NotEmpty(t, cv.Properties.MimeTypes)
+		}
+	})
+
+	t.Run("sort by lower appName then appID then action then path", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("zebra", "Mail", []Capability{capPick("/p", "*/*")})))
+		require.NoError(t, store.Upsert(makeManifest("alpha", "mail", []Capability{capPick("/p", "*/*")})))
+		require.NoError(t, store.Upsert(makeManifest("gamma", "Archive", []Capability{capPick("/p", "*/*")})))
+
+		got := store.Capabilities(CapabilityFilter{})
+		require.Len(t, got, 3)
+		// Expected: Archive (gamma) < mail (alpha) < Mail (zebra)
+		require.Equal(t, "gamma", got[0].AppID, "Archive first by lower(name)")
+		require.Equal(t, "alpha", got[1].AppID, "alpha before zebra by appID tiebreaker")
+		require.Equal(t, "zebra", got[2].AppID)
+	})
+
+	t.Run("sort action and path tiebreakers", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "Solo", []Capability{
+			capSave("/b", "*/*"),
+			capPick("/b", "*/*"),
+			capPick("/a", "*/*"),
+		})))
+
+		got := store.Capabilities(CapabilityFilter{})
+		require.Len(t, got, 3)
+		// Same appName + same appId → action tiebreaker (PICK < SAVE).
+		// Within PICK → path tiebreaker (/a < /b).
+		require.Equal(t, "PICK", got[0].Action)
+		require.Equal(t, "/a", got[0].Path)
+		require.Equal(t, "PICK", got[1].Action)
+		require.Equal(t, "/b", got[1].Path)
+		require.Equal(t, "SAVE", got[2].Action)
+		require.Equal(t, "/b", got[2].Path)
+	})
+
+	t.Run("filter by action PICK", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "App", []Capability{
+			capPick("/pick", "*/*"),
+			capSave("/save", "*/*"),
+		})))
+		got := store.Capabilities(CapabilityFilter{Action: "PICK"})
+		require.Len(t, got, 1)
+		require.Equal(t, "PICK", got[0].Action)
+	})
+
+	t.Run("filter by action SAVE", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "App", []Capability{
+			capPick("/pick", "*/*"),
+			capSave("/save", "*/*"),
+		})))
+		got := store.Capabilities(CapabilityFilter{Action: "SAVE"})
+		require.Len(t, got, 1)
+		require.Equal(t, "SAVE", got[0].Action)
+	})
+
+	t.Run("filter by action is case-sensitive", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "App", []Capability{
+			capPick("/pick", "*/*"),
+		})))
+		got := store.Capabilities(CapabilityFilter{Action: "pick"})
+		require.Empty(t, got)
+	})
+
+	t.Run("filter by mimeType exact", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("img", "Img", []Capability{capPick("/p", "image/png")})))
+		require.NoError(t, store.Upsert(makeManifest("txt", "Txt", []Capability{capPick("/p", "text/plain")})))
+
+		got := store.Capabilities(CapabilityFilter{MimeType: "image/png"})
+		require.Len(t, got, 1)
+		require.Equal(t, "img", got[0].AppID)
+
+		// Same query with params + uppercase — canonicalized inside Capabilities.
+		got = store.Capabilities(CapabilityFilter{MimeType: "IMAGE/PNG; charset=utf-8"})
+		require.Len(t, got, 1)
+		require.Equal(t, "img", got[0].AppID)
+	})
+
+	t.Run("filter by mimeType type wildcard", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("img", "Img", []Capability{capPick("/p", "image/png")})))
+		require.NoError(t, store.Upsert(makeManifest("txt", "Txt", []Capability{capPick("/p", "text/plain")})))
+
+		got := store.Capabilities(CapabilityFilter{MimeType: "image/*"})
+		require.Len(t, got, 1)
+		require.Equal(t, "img", got[0].AppID)
+	})
+
+	t.Run("filter by mimeType full wildcard returns all", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("img", "Img", []Capability{capPick("/p", "image/png")})))
+		require.NoError(t, store.Upsert(makeManifest("txt", "Txt", []Capability{capPick("/p", "text/plain")})))
+
+		got := store.Capabilities(CapabilityFilter{MimeType: "*/*"})
+		require.Len(t, got, 2)
+	})
+
+	t.Run("filter by mimeType against capability wildcard (symmetric)", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		// "Files"-app pattern: declares */* and expects to match any query.
+		require.NoError(t, store.Upsert(makeManifest("files", "Files", []Capability{capPick("/p", "*/*")})))
+		require.NoError(t, store.Upsert(makeManifest("txt", "Txt", []Capability{capPick("/p", "text/plain")})))
+
+		// Query with exact image/png. Files should match (symmetric), Txt should not.
+		got := store.Capabilities(CapabilityFilter{MimeType: "image/png"})
+		require.Len(t, got, 1)
+		require.Equal(t, "files", got[0].AppID)
+	})
+
+	t.Run("filter by mimeType OR semantics over multi-mime capability", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("multi", "Multi", []Capability{
+			capPick("/p", "text/plain", "image/png"),
+		})))
+
+		// Query matches image/png → the capability (which carries both) matches.
+		got := store.Capabilities(CapabilityFilter{MimeType: "image/png"})
+		require.Len(t, got, 1)
+
+		// Query for an unrelated type → no match.
+		got = store.Capabilities(CapabilityFilter{MimeType: "video/mp4"})
+		require.Empty(t, got)
+	})
+
+	t.Run("malformed filter mimeType returns empty", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "App", []Capability{capPick("/p", "*/*")})))
+
+		got := store.Capabilities(CapabilityFilter{MimeType: "not a valid mime"})
+		require.Empty(t, got, "malformed mime filter → empty, not error")
+
+		got = store.Capabilities(CapabilityFilter{MimeType: "*/subtype"})
+		require.Empty(t, got, "rejected wildcard form → empty")
+	})
+
+	t.Run("combined action and mimeType filters", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.NoError(t, store.Upsert(makeManifest("app", "App", []Capability{
+			capPick("/pick", "image/png"),
+			capSave("/save", "image/png"),
+			capPick("/pick-txt", "text/plain"),
+		})))
+
+		got := store.Capabilities(CapabilityFilter{Action: "PICK", MimeType: "image/*"})
+		require.Len(t, got, 1)
+		require.Equal(t, "PICK", got[0].Action)
+		require.Equal(t, "/pick", got[0].Path)
+	})
+
+	t.Run("empty store returns empty slice for any filter", func(t *testing.T) {
+		store, _ := newEmptyStore(t)
+		require.Empty(t, store.Capabilities(CapabilityFilter{}))
+		require.Empty(t, store.Capabilities(CapabilityFilter{Action: "PICK"}))
+		require.Empty(t, store.Capabilities(CapabilityFilter{MimeType: "image/png"}))
+	})
+}
