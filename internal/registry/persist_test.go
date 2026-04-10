@@ -1,7 +1,10 @@
 package registry
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -81,4 +84,54 @@ func TestNewStore_UnknownField(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "load registry from")
 	require.Contains(t, err.Error(), "unknown-field.json")
+}
+
+func TestStore_Upsert_WritesAtomically(t *testing.T) {
+	store, path := newEmptyStore(t)
+	require.NoError(t, store.Upsert(sampleManifest("app-1", "App One")))
+
+	// Read the file back and decode.
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+	var ff fileFormat
+	require.NoError(t, json.Unmarshal(data, &ff))
+	require.Equal(t, currentFormatVersion, ff.Version)
+	require.Len(t, ff.Manifests, 1)
+	require.Equal(t, "app-1", ff.Manifests[0].ID)
+
+	// Assert no tmp files left behind in the directory.
+	entries, err := os.ReadDir(filepath.Dir(path))
+	require.NoError(t, err)
+	for _, e := range entries {
+		require.NotContains(t, e.Name(), ".tmp-", "no leftover temp files after successful persist")
+	}
+}
+
+func TestStore_Upsert_WritesIndentedJSON(t *testing.T) {
+	store, path := newEmptyStore(t)
+	require.NoError(t, store.Upsert(sampleManifest("app-1", "App One")))
+
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+	// 2-space indentation → every nested object field is preceded by "\n  " or deeper.
+	require.Contains(t, string(data), "\n  ", "file should be indented with 2 spaces")
+	require.True(t, strings.HasPrefix(string(data), "{\n"),
+		"file should start with '{\\n' indicating multi-line formatting")
+}
+
+func TestStore_Upsert_DeterministicOrder(t *testing.T) {
+	// Insert in reverse order; persisted file should list manifests sorted by id.
+	store, path := newEmptyStore(t)
+	require.NoError(t, store.Upsert(sampleManifest("z-app", "Z")))
+	require.NoError(t, store.Upsert(sampleManifest("a-app", "A")))
+	require.NoError(t, store.Upsert(sampleManifest("m-app", "M")))
+
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+	var ff fileFormat
+	require.NoError(t, json.Unmarshal(data, &ff))
+	require.Len(t, ff.Manifests, 3)
+	require.Equal(t, "a-app", ff.Manifests[0].ID)
+	require.Equal(t, "m-app", ff.Manifests[1].ID)
+	require.Equal(t, "z-app", ff.Manifests[2].ID)
 }
