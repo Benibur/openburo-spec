@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -133,4 +134,80 @@ func (s *Store) Delete(id string) (bool, error) {
 	return true, nil
 }
 
-// Capabilities is implemented in Plan 02-03.
+// Capabilities returns all capabilities across all manifests as
+// CapabilityView entries, filtered by filter and sorted per Phase 2
+// rules: (lower(AppName), AppID, Action, Path). Filter is applied before
+// sort. An empty filter returns every capability. A malformed
+// filter.MimeType yields an empty slice (no error); callers wanting a
+// 400-on-malformed-query should pre-validate via CanonicalizeMIME.
+//
+// OR semantics on MIME filter: a capability matches if ANY of its
+// declared MIME types matches the query under symmetric 3x3 wildcard
+// matching.
+func (s *Store) Capabilities(filter CapabilityFilter) []CapabilityView {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Canonicalize the query MIME once, outside the loop.
+	var wantMime string
+	var wantMimeSet bool
+	if filter.MimeType != "" {
+		canon, err := canonicalizeMIME(filter.MimeType)
+		if err != nil {
+			// Open question #3 lock: malformed filter.MimeType → empty result,
+			// not an error. Callers pre-validate with CanonicalizeMIME if they
+			// want a distinct 400 response.
+			return nil
+		}
+		wantMime = canon
+		wantMimeSet = true
+	}
+
+	out := make([]CapabilityView, 0)
+	for _, m := range s.manifests {
+		for _, c := range m.Capabilities {
+			// Action filter: exact match, case-sensitive.
+			if filter.Action != "" && c.Action != filter.Action {
+				continue
+			}
+			// MIME filter: OR over the capability's declared mimeTypes.
+			if wantMimeSet {
+				matched := false
+				for _, capMime := range c.Properties.MimeTypes {
+					if mimeMatch(capMime, wantMime) {
+						matched = true
+						break
+					}
+				}
+				if !matched {
+					continue
+				}
+			}
+			out = append(out, CapabilityView{
+				AppID:      m.ID,
+				AppName:    m.Name,
+				Action:     c.Action,
+				Path:       c.Path,
+				Properties: c.Properties,
+			})
+		}
+	}
+
+	// 4-key stable sort: (lower(appName), appID, action, path).
+	sort.SliceStable(out, func(i, j int) bool {
+		ai := strings.ToLower(out[i].AppName)
+		aj := strings.ToLower(out[j].AppName)
+		if ai != aj {
+			return ai < aj
+		}
+		if out[i].AppID != out[j].AppID {
+			return out[i].AppID < out[j].AppID
+		}
+		if out[i].Action != out[j].Action {
+			return out[i].Action < out[j].Action
+		}
+		return out[i].Path < out[j].Path
+	})
+
+	return out
+}
