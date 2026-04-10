@@ -1,7 +1,10 @@
 package httpapi
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -12,6 +15,11 @@ import (
 // captures the status code so logMiddleware can log it. Handlers that call
 // WriteHeader multiple times are caught by the first call only (same as
 // stdlib behavior).
+//
+// Hijack() is implemented so the WebSocket upgrade path in
+// handleCapabilitiesWS can succeed: coder/websocket.Accept calls
+// http.Hijacker on the response writer, and middleware wrappers that
+// don't forward the interface break the upgrade with a 501 response.
 type statusCapturingWriter struct {
 	http.ResponseWriter
 	status int
@@ -20,6 +28,21 @@ type statusCapturingWriter struct {
 func (w *statusCapturingWriter) WriteHeader(code int) {
 	w.status = code
 	w.ResponseWriter.WriteHeader(code)
+}
+
+// Hijack forwards to the underlying ResponseWriter if it implements
+// http.Hijacker so the WebSocket upgrade can take over the TCP conn.
+// Returning a non-nil error when the inner writer doesn't support
+// hijacking matches the stdlib convention that coder/websocket checks.
+func (w *statusCapturingWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := w.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, errors.New("httpapi: underlying ResponseWriter does not support Hijacker")
+	}
+	// Mark status as 101 so the request log reflects the successful
+	// protocol switch instead of the default 200.
+	w.status = http.StatusSwitchingProtocols
+	return h.Hijack()
 }
 
 // recoverMiddleware is the OUTERMOST middleware. It catches panics from

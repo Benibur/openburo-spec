@@ -107,19 +107,9 @@ func (s *Server) Handler() http.Handler {
 	return h
 }
 
-// stub501 is the Plan 04-01 placeholder handler. Every Phase 4 route that
-// is not wired yet (auth, registry handlers, caps, ws) is registered with
-// this stub, returning 501 Not Implemented with the envelope shape so
-// integration tests exercise the full middleware chain from day one.
-// Later plans (04-02..04-05) replace each stub with the real handler.
-func (s *Server) stub501(w http.ResponseWriter, r *http.Request) {
-	writeJSONError(w, http.StatusNotImplemented, "not implemented", nil)
-}
-
-// registerRoutes wires every route Phase 4 is responsible for. Plans
-// 04-02..04-04 replace the stub501 calls with real handlers in-place.
-// Always use the Go 1.22+ method-prefixed pattern ("GET /health", not
-// "/health") so the mux rejects wrong methods with 405 automatically.
+// registerRoutes wires every route Phase 4 is responsible for. Always use
+// the Go 1.22+ method-prefixed pattern ("GET /health", not "/health") so
+// the mux rejects wrong methods with 405 automatically.
 func (s *Server) registerRoutes() {
 	// Phase 1 route (unchanged)
 	s.mux.HandleFunc("GET /health", s.handleHealth)
@@ -133,8 +123,6 @@ func (s *Server) registerRoutes() {
 	// Phase 4 read routes (public)
 	s.mux.HandleFunc("GET /api/v1/registry", s.handleRegistryList)
 	s.mux.HandleFunc("GET /api/v1/registry/{appId}", s.handleRegistryGet)
-
-	// Phase 4 stubs replaced in later plans
-	s.mux.HandleFunc("GET /api/v1/capabilities", s.stub501)    // plan 04-04
-	s.mux.HandleFunc("GET /api/v1/capabilities/ws", s.stub501) // plan 04-04
+	s.mux.HandleFunc("GET /api/v1/capabilities", s.handleCapabilities)
+	s.mux.HandleFunc("GET /api/v1/capabilities/ws", s.handleCapabilitiesWS)
 }

@@ -59,3 +59,56 @@ func newRegistryUpdatedEvent(appID string, change changeType) []byte {
 	b, _ := json.Marshal(evt)
 	return b
 }
+
+// snapshotPayload is the dedicated payload type for SNAPSHOT events.
+// It exists separately from eventPayload because eventPayload tags
+// Capabilities with `omitempty` (so upsert/delete events drop the
+// field), but snapshot events MUST always emit `"capabilities":[]` —
+// never null, never missing — so clients can do
+//
+//	state = event.payload.capabilities
+//
+// without a null check. Same wire shape as eventPayload for the
+// populated case; different zero-value serialization.
+type snapshotPayload struct {
+	Change       changeType                `json:"change"`
+	Capabilities []registry.CapabilityView `json:"capabilities"`
+}
+
+// snapshotEvent is the envelope for a SNAPSHOT REGISTRY_UPDATED event.
+// Reuses the top-level Event/Timestamp fields of registryUpdatedEvent
+// but carries snapshotPayload so the capabilities field always renders.
+type snapshotEvent struct {
+	Event     string          `json:"event"`
+	Timestamp string          `json:"timestamp"`
+	Payload   snapshotPayload `json:"payload"`
+}
+
+// newSnapshotEvent builds a REGISTRY_UPDATED event carrying the full
+// capability list. This is the initial message sent to every new
+// WebSocket subscriber (WS-06) — clients do
+//
+//	state = event.payload.capabilities
+//
+// and then refetch the REST endpoint on any subsequent event.
+//
+// The payload.change is SNAPSHOT, payload.appId is absent entirely
+// (the snapshotPayload type has no AppID field), and
+// payload.capabilities is ALWAYS a non-nil slice (possibly empty)
+// so the consumer can always do `state = event.payload.capabilities`
+// without a null check.
+func newSnapshotEvent(caps []registry.CapabilityView) []byte {
+	if caps == nil {
+		caps = []registry.CapabilityView{}
+	}
+	evt := snapshotEvent{
+		Event:     "REGISTRY_UPDATED",
+		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000Z07:00"),
+		Payload: snapshotPayload{
+			Change:       changeSnapshot,
+			Capabilities: caps,
+		},
+	}
+	b, _ := json.Marshal(evt)
+	return b
+}
