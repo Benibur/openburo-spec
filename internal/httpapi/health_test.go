@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -12,9 +11,7 @@ import (
 )
 
 func TestHealth(t *testing.T) {
-	// Use a discard logger so tests don't spew to stderr.
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := New(logger)
+	srv := newTestServer(t)
 
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	// Critical for FOUND-04: no Authorization header set. The test builds
@@ -33,8 +30,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestHealth_RejectsWrongMethod(t *testing.T) {
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := New(logger)
+	srv := newTestServer(t)
 
 	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodDelete} {
 		t.Run(method, func(t *testing.T) {
