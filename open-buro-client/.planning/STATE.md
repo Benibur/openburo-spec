@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-03-ui-PLAN.md; UI layer complete; 41 happy-dom tests pass; pnpm lint + typecheck clean
-last_updated: "2026-04-10T10:28:26.052Z"
+stopped_at: Completed 02-01-capabilities-PLAN.md; 32 tests green; pnpm run ci exits 0
+last_updated: "2026-04-10T10:33:51.488Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -49,6 +49,7 @@ Plan: 1 of 5
 | Phase 02-core-implementation P02 | 8 | 2 tasks | 3 files |
 | Phase 02-core-implementation P04 | 4 | 3 tasks | 6 files |
 | Phase 02-core-implementation P03 | 6 | 4 tasks | 9 files |
+| Phase 02-core-implementation P01 | 11 | 4 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [Phase 02-core-implementation]: penpal imported only from src/messaging/penpal-bridge.ts — grep-enforceable single import site
 - [Phase 02-core-implementation]: 02-03: setAttribute('style') used for iframe to preserve CSS min() values (happy-dom normalizes them away in style.cssText)
 - [Phase 02-core-implementation]: 02-03: root.activeElement used throughout focus-trap — document.activeElement returns shadow host, not inner focused element
+- [Phase 02-01]: Biome config uses single quotes (not double as documented in critical rules); template literals and ** exponentiation also enforced
+- [Phase 02-01]: FakeWebSocket static constants defined in test to avoid Node env missing global WebSocket; simulateClose uses Event not CloseEvent
+- [Phase 02-01]: WS-05 destroyed guard in 3 locations: start(), top of connect(), and top of setTimeout callback
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-10T10:28:26.050Z
-Stopped at: Completed 02-03-ui-PLAN.md; UI layer complete; 41 happy-dom tests pass; pnpm lint + typecheck clean
+Last session: 2026-04-10T10:33:51.487Z
+Stopped at: Completed 02-01-capabilities-PLAN.md; 32 tests green; pnpm run ci exits 0
 Resume file: None

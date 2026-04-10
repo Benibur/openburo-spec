@@ -20,33 +20,33 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### Capability Loading
 
-- [ ] **CAP-01**: HTTP loader fetches capabilities from `options.capabilitiesUrl` and returns `Capability[]`
-- [ ] **CAP-02**: Loader detects OpenBuro Server via `X-OpenBuro-Server: true` response header
-- [ ] **CAP-03**: Loader errors surface as `OBCError { code: 'CAPABILITIES_FETCH_FAILED', cause }` through `onError` and a rejected `refreshCapabilities()` Promise
-- [ ] **CAP-04**: Loader accepts `AbortController.signal` so in-flight requests are cancellable from `destroy()` **[research]**
-- [ ] **CAP-05**: Loader refuses non-HTTPS `capabilitiesUrl` at runtime with a clear error (mixed-content guard) **[research]**
-- [ ] **CAP-06**: `getCapabilities()` returns the in-memory capability list synchronously
-- [ ] **CAP-07**: `refreshCapabilities()` forces an HTTP reload and returns the new list
+- [x] **CAP-01**: HTTP loader fetches capabilities from `options.capabilitiesUrl` and returns `Capability[]`
+- [x] **CAP-02**: Loader detects OpenBuro Server via `X-OpenBuro-Server: true` response header
+- [x] **CAP-03**: Loader errors surface as `OBCError { code: 'CAPABILITIES_FETCH_FAILED', cause }` through `onError` and a rejected `refreshCapabilities()` Promise
+- [x] **CAP-04**: Loader accepts `AbortController.signal` so in-flight requests are cancellable from `destroy()` **[research]**
+- [x] **CAP-05**: Loader refuses non-HTTPS `capabilitiesUrl` at runtime with a clear error (mixed-content guard) **[research]**
+- [x] **CAP-06**: `getCapabilities()` returns the in-memory capability list synchronously
+- [x] **CAP-07**: `refreshCapabilities()` forces an HTTP reload and returns the new list
 
 ### Capability Resolution
 
-- [ ] **RES-01**: Resolver is a pure function: `(capabilities, intent) => Capability[]`
-- [ ] **RES-02**: Match rule: `C.action === I.action`
-- [ ] **RES-03**: Match rule: empty/absent `I.args.allowedMimeType` matches all
-- [ ] **RES-04**: Match rule: `C.properties.mimeTypes` contains `*/*` matches any mime
-- [ ] **RES-05**: Match rule: exact mime string match
-- [ ] **RES-06**: Match rule: `I.args.allowedMimeType === '*/*'` matches any capability
+- [x] **RES-01**: Resolver is a pure function: `(capabilities, intent) => Capability[]`
+- [x] **RES-02**: Match rule: `C.action === I.action`
+- [x] **RES-03**: Match rule: empty/absent `I.args.allowedMimeType` matches all
+- [x] **RES-04**: Match rule: `C.properties.mimeTypes` contains `*/*` matches any mime
+- [x] **RES-05**: Match rule: exact mime string match
+- [x] **RES-06**: Match rule: `I.args.allowedMimeType === '*/*'` matches any capability
 - [x] **RES-07**: Pure `planCast()` function returns `CastPlan` discriminated union (`no-match` | `direct` | `select`) — unit-testable without DOM **[research]**
 
 ### WebSocket Live Updates
 
-- [ ] **WS-01**: When `liveUpdates` is enabled (default true when server header detected), open WebSocket to `wsUrl`
-- [ ] **WS-02**: `wsUrl` auto-derived from `capabilitiesUrl` if not provided (replace `/capabilities` with `/capabilities/ws`)
-- [ ] **WS-03**: On `REGISTRY_UPDATED` event, trigger `refreshCapabilities()` and invoke `onCapabilitiesUpdated`
-- [ ] **WS-04**: Full-jitter exponential backoff: 1s → 2s → 4s → 8s → 30s cap, max 5 attempts (configurable) **[research: jitter added]**
-- [ ] **WS-05**: Internal `destroyed` flag prevents post-`destroy()` reconnect timers from opening new sockets **[research]**
-- [ ] **WS-06**: WS failure after exhausted retries surfaces `OBCError { code: 'WS_CONNECTION_FAILED' }`
-- [ ] **WS-07**: Non-`wss://` protocol rejected at runtime to match HTTPS mixed-content policy **[research]**
+- [x] **WS-01**: When `liveUpdates` is enabled (default true when server header detected), open WebSocket to `wsUrl`
+- [x] **WS-02**: `wsUrl` auto-derived from `capabilitiesUrl` if not provided (replace `/capabilities` with `/capabilities/ws`)
+- [x] **WS-03**: On `REGISTRY_UPDATED` event, trigger `refreshCapabilities()` and invoke `onCapabilitiesUpdated`
+- [x] **WS-04**: Full-jitter exponential backoff: 1s → 2s → 4s → 8s → 30s cap, max 5 attempts (configurable) **[research: jitter added]**
+- [x] **WS-05**: Internal `destroyed` flag prevents post-`destroy()` reconnect timers from opening new sockets **[research]**
+- [x] **WS-06**: WS failure after exhausted retries surfaces `OBCError { code: 'WS_CONNECTION_FAILED' }`
+- [x] **WS-07**: Non-`wss://` protocol rejected at runtime to match HTTPS mixed-content policy **[research]**
 
 ### Intent Orchestration
 
@@ -183,27 +183,27 @@ Explicitly excluded. Documented to prevent scope creep.
 | FOUND-05 | Phase 1 | Complete |
 | FOUND-06 | Phase 1 | Complete |
 | FOUND-07 | Phase 1 | Complete |
-| CAP-01 | Phase 2 | Pending |
-| CAP-02 | Phase 2 | Pending |
-| CAP-03 | Phase 2 | Pending |
-| CAP-04 | Phase 2 | Pending |
-| CAP-05 | Phase 2 | Pending |
-| CAP-06 | Phase 2 | Pending |
-| CAP-07 | Phase 2 | Pending |
-| RES-01 | Phase 2 | Pending |
-| RES-02 | Phase 2 | Pending |
-| RES-03 | Phase 2 | Pending |
-| RES-04 | Phase 2 | Pending |
-| RES-05 | Phase 2 | Pending |
-| RES-06 | Phase 2 | Pending |
+| CAP-01 | Phase 2 | Complete |
+| CAP-02 | Phase 2 | Complete |
+| CAP-03 | Phase 2 | Complete |
+| CAP-04 | Phase 2 | Complete |
+| CAP-05 | Phase 2 | Complete |
+| CAP-06 | Phase 2 | Complete |
+| CAP-07 | Phase 2 | Complete |
+| RES-01 | Phase 2 | Complete |
+| RES-02 | Phase 2 | Complete |
+| RES-03 | Phase 2 | Complete |
+| RES-04 | Phase 2 | Complete |
+| RES-05 | Phase 2 | Complete |
+| RES-06 | Phase 2 | Complete |
 | RES-07 | Phase 2 | Complete |
-| WS-01 | Phase 2 | Pending |
-| WS-02 | Phase 2 | Pending |
-| WS-03 | Phase 2 | Pending |
-| WS-04 | Phase 2 | Pending |
-| WS-05 | Phase 2 | Pending |
-| WS-06 | Phase 2 | Pending |
-| WS-07 | Phase 2 | Pending |
+| WS-01 | Phase 2 | Complete |
+| WS-02 | Phase 2 | Complete |
+| WS-03 | Phase 2 | Complete |
+| WS-04 | Phase 2 | Complete |
+| WS-05 | Phase 2 | Complete |
+| WS-06 | Phase 2 | Complete |
+| WS-07 | Phase 2 | Complete |
 | INT-01 | Phase 2 | Complete |
 | INT-02 | Phase 2 | Complete |
 | INT-03 | Phase 2 | Complete |
