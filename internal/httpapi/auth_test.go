@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -160,40 +161,53 @@ func TestAuth_DummyHashBcryptRuns(t *testing.T) {
 		"empty-creds path too fast (%v) - dummyHash bcrypt did NOT run", elapsed)
 }
 
-// TestAuth_NoCredentialsInLogs captures slog output and proves no PII leaks.
-// This is the TEST-06 anchor. Plan 04-05 will extend it to cover the full
-// middleware chain; this plan covers just authBasic's Warn log line.
+// TestAuth_NoCredentialsInLogs — extended in Plan 04-05 to cover the FULL
+// middleware chain (recover -> log -> cors -> authBasic -> handler) via
+// httptest.NewServer. Asserts PII-free logs end-to-end across a failed auth,
+// a successful auth (which emits an audit log line), and a second failed
+// auth with a different (nonexistent) username. This is the TEST-06 final
+// assertion.
 func TestAuth_NoCredentialsInLogs(t *testing.T) {
 	buf := &syncBuffer{}
 	logger := slog.New(slog.NewTextHandler(buf, nil))
-	srv := newAuthTestServer(t, logger)
-	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	h := srv.authBasic(next)
+	srv := newTestServerWithLogger(t, logger)
+	creds, err := LoadCredentials("testdata/credentials-valid.yaml")
+	require.NoError(t, err)
+	srv.creds = creds
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
 
-	// 1. Failed auth
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/registry", nil)
-	req.SetBasicAuth("admin", "WRONGPASSWORD")
-	h.ServeHTTP(rr, req)
-	require.Equal(t, http.StatusUnauthorized, rr.Code)
+	const manifestJSON = `{"id":"mail-app","name":"Mail","url":"https://mail.example/","version":"1.0","capabilities":[{"action":"PICK","path":"/pick","properties":{"mimeTypes":["*/*"]}}]}`
 
-	// 2. Successful auth
-	rr2 := httptest.NewRecorder()
-	req2 := httptest.NewRequest(http.MethodPost, "/api/v1/registry", nil)
-	req2.SetBasicAuth("admin", "testpass")
-	h.ServeHTTP(rr2, req2)
-	require.Equal(t, http.StatusOK, rr2.Code)
+	doPOST := func(user, pass string) {
+		req, _ := http.NewRequest(http.MethodPost, ts.URL+"/api/v1/registry", strings.NewReader(manifestJSON))
+		req.Header.Set("Content-Type", "application/json")
+		req.SetBasicAuth(user, pass)
+		resp, _ := ts.Client().Do(req)
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}
+
+	// 1. Failed auth (wrong password)
+	doPOST("admin", "WRONGPASSWORD_secret_value")
+	// 2. Successful auth (emits audit log)
+	doPOST("admin", "testpass")
+	// 3. Failed auth (unknown user)
+	doPOST("nonexistent_user", "anotherSecret")
 
 	out := buf.String()
-	// PII assertions - these MUST all pass or AUTH-05 is violated.
-	require.NotContains(t, out, "WRONGPASSWORD", "log contains plaintext password")
-	require.NotContains(t, out, "testpass", "log contains plaintext valid password")
-	require.NotContains(t, out, "Basic YWRtaW4", "log contains base64 Basic header")
-	require.NotContains(t, out, "YWRtaW46", "log contains base64 username prefix")
-	require.NotContains(t, out, "Authorization", "log leaks header name (sign of header dump)")
-	// The username `admin` by itself is not forbidden here - the audit log
-	// in plan 04-03 is ALLOWED to emit user=admin. This middleware just
-	// must not leak the credential MATERIAL (password, header, base64).
+	forbidden := []string{
+		"WRONGPASSWORD_secret_value",
+		"anotherSecret",
+		"testpass",
+		"$2a$",             // bcrypt hash prefix — the stored hash MUST NOT leak
+		"Basic YWRt",       // base64 "Basic admin..." prefix
+		"YWRtaW46",         // base64 "admin:" prefix
+		"Authorization",    // header name would indicate header dump
+		"nonexistent_user", // the supplied-but-unknown username — authBasic must NOT log usernames
+	}
+	for _, needle := range forbidden {
+		require.NotContains(t, out, needle, "log contains forbidden substring %q — full log:\n%s", needle, out)
+	}
 }
