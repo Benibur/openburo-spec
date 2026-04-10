@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-server-middleware-PLAN.md
-last_updated: "2026-04-10T12:43:05.847Z"
+stopped_at: Completed 04-02-auth-credentials-PLAN.md
+last_updated: "2026-04-10T12:52:00Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 14
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 04 (http-api) — EXECUTING
-Plan: 2 of 5 (Plan 04-01 complete)
+Plan: 3 of 5 (Plans 04-01, 04-02 complete)
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Plan: 2 of 5 (Plan 04-01 complete)
 | Phase 03-websocket-hub P02 | 8min | 2 tasks (TDD RED/GREEN) | 4 files (1 created, 3 modified) |
 | Phase 03-websocket-hub P03 | 5min | 2 tasks | 2 files |
 | Phase 04-http-api P01 | 5min | 2 tasks | 8 files |
+| Phase 04-http-api P02 | 7min | 3 tasks (chore + TDD RED/GREEN) | 10 files (2 prod, 2 test, 3 fixtures, 1 modified, 2 go.mod/sum) |
 
 ## Accumulated Context
 
@@ -113,6 +114,14 @@ Recent decisions affecting current work:
 - [Phase 04-http-api]: Plan 04-01: Middleware chain composed as recover(log(cors(mux))) in Handler() — recover is OUTERMOST so it catches panics from any inner layer; corsMiddleware is Plan 04-01 pass-through placeholder that Plan 04-05 swaps in place
 - [Phase 04-http-api]: Plan 04-01: All 6 Phase 4 routes registered with shared stub501 handler returning 501 envelope so downstream plans replace handler bodies (not route registrations) — the route table stays stable across 04-02..04-04
 - [Phase 04-http-api]: Plan 04-01: [Rule 3 deviation] cmd/server/main.go expanded from Phase 1 single-arg New to minimal 5-arg wiring to keep whole-module build green — Phase 5 will replace with full compose-root wiring (LoadCredentials, graceful shutdown, two-phase Close)
+- [Phase 04-http-api]: Plan 04-02: Credentials stub replaced in place — real type body lives in credentials.go (byte-identical struct), Server.New signature unchanged; LoadCredentials enforces bcrypt cost >= 12 all-or-nothing at load time with user-named error message
+- [Phase 04-http-api]: Plan 04-02: PITFALLS #8 timing-safe Basic Auth — bcrypt.CompareHashAndPassword runs UNCONDITIONALLY on every request, unknown user substitutes precomputed cost-12 dummyHash; final gate is `subtle.ConstantTimeCompare([]byte{foundByte, matchByte}, []byte{1, 1}) != 1` (NOT a short-circuit `if found && matches`)
+- [Phase 04-http-api]: Plan 04-02: dummyHash precomputed in package init() via bcrypt.GenerateFromPassword(cost 12) — ~150ms package startup cost paid once, amortized to zero per request
+- [Phase 04-http-api]: Plan 04-02: Authenticated username stashed in r.Context() under unexported `type ctxKey int` sentinel (ctxKeyUser iota) — Go context-key convention, prevents cross-package collisions; usernameFromContext helper retrieves it for plan 04-03 audit log
+- [Phase 04-http-api]: Plan 04-02: PII-safe Warn log line — `httpapi: basic auth failed` carries exactly {path, method, remote}; never username/password/Authorization/hash. Audit log in plan 04-03 runs AFTER authBasic on SUCCESS only in a separate call
+- [Phase 04-http-api]: Plan 04-02: testdata fixtures (credentials-valid.yaml cost-12, credentials-low-cost.yaml cost-10, credentials-malformed.yaml broken YAML) checked into git — fast test startup vs generating hashes at runtime
+- [Phase 04-http-api]: Plan 04-02: [Rule 3 deviation, test-runner only] Plan's `-timeout 30s` was insufficient under -race because bcrypt cost-12 takes ~2s per verification under the race detector (vs ~150ms normally); full Auth suite takes ~32s. Raised to 120s for the plan-specific sweep and 180s for the full httpapi sweep. No source code change
+- [Phase 04-http-api]: Plan 04-02: golang.org/x/crypto v0.50.0 flipped from indirect to direct in Task 2 GREEN (auth.go + credentials.go import bcrypt from production code); Task 0 `go mod tidy` removed it because fixture generation ran via one-shot `go run /tmp/genhash*.go` outside the module (expected indirect/direct dance, no anchor file needed)
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -131,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T12:43:05.845Z
-Stopped at: Completed 04-01-server-middleware-PLAN.md
+Last session: 2026-04-10T12:52:00Z
+Stopped at: Completed 04-02-auth-credentials-PLAN.md
 Resume file: None

@@ -46,11 +46,11 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Authentication
 
-- [ ] **AUTH-01**: `credentials.yaml` is loaded at startup with bcrypt password hashes (cost ≥ 12 enforced at load time)
-- [ ] **AUTH-02**: HTTP Basic Auth middleware protects all write routes (`POST /api/v1/registry`, `DELETE /api/v1/registry/{appId}`)
-- [ ] **AUTH-03**: Read routes (`GET /api/v1/registry`, `GET /api/v1/registry/{appId}`, `GET /api/v1/capabilities`, `GET /health`) are publicly accessible
-- [ ] **AUTH-04**: Auth comparison is timing-safe: no early return on username mismatch, username compared via `subtle.ConstantTimeCompare`, bcrypt always runs (dummy hash fallback)
-- [ ] **AUTH-05**: Credentials (Authorization header, username, password) never appear in any log line; enforced by a dedicated test
+- [x] **AUTH-01**: `credentials.yaml` is loaded at startup with bcrypt password hashes (cost ≥ 12 enforced at load time)
+- [x] **AUTH-02**: HTTP Basic Auth middleware protects all write routes (`POST /api/v1/registry`, `DELETE /api/v1/registry/{appId}`)
+- [x] **AUTH-03**: Read routes (`GET /api/v1/registry`, `GET /api/v1/registry/{appId}`, `GET /api/v1/capabilities`, `GET /health`) are publicly accessible
+- [x] **AUTH-04**: Auth comparison is timing-safe: no early return on username mismatch, username compared via `subtle.ConstantTimeCompare`, bcrypt always runs (dummy hash fallback)
+- [x] **AUTH-05**: Credentials (Authorization header, username, password) never appear in any log line; enforced by a dedicated test
 
 ### HTTP API
 
@@ -95,7 +95,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [ ] **TEST-03**: Test suite passes under `go test ./... -race` without warnings
 - [x] **TEST-04**: Persistence rollback test uses an unwritable directory to prove in-memory state rolls back on persist failure
 - [ ] **TEST-05**: WebSocket origin-rejection test asserts a disallowed `Origin` header returns `403`
-- [ ] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
+- [x] **TEST-06**: Dedicated test captures slog output across a failed-auth scenario and asserts no credential material appears
 - [x] **TEST-07**: Project follows idiomatic Go layout: `cmd/server/` + `internal/{config,registry,httpapi,wshub}/`
 
 ## v2 Requirements
@@ -179,11 +179,11 @@ Populated during roadmap creation on 2026-04-09.
 | PERS-03 | Phase 2 | Complete |
 | PERS-04 | Phase 2 | Complete |
 | PERS-05 | Phase 2 | Complete |
-| AUTH-01 | Phase 4 | Pending |
-| AUTH-02 | Phase 4 | Pending |
-| AUTH-03 | Phase 4 | Pending |
-| AUTH-04 | Phase 4 | Pending |
-| AUTH-05 | Phase 4 | Pending |
+| AUTH-01 | Phase 4 | Complete |
+| AUTH-02 | Phase 4 | Complete |
+| AUTH-03 | Phase 4 | Complete |
+| AUTH-04 | Phase 4 | Complete |
+| AUTH-05 | Phase 4 | Complete |
 | API-01 | Phase 4 | Pending |
 | API-02 | Phase 4 | Pending |
 | API-03 | Phase 4 | Pending |
@@ -216,7 +216,7 @@ Populated during roadmap creation on 2026-04-09.
 | TEST-03 | Phase 5 | Pending |
 | TEST-04 | Phase 2 | Complete |
 | TEST-05 | Phase 4 | Pending |
-| TEST-06 | Phase 4 | Pending |
+| TEST-06 | Phase 4 | Complete |
 | TEST-07 | Phase 1 | Complete |
 
 **Coverage:**
