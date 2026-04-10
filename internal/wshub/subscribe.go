@@ -84,10 +84,16 @@ func (h *Hub) Subscribe(ctx context.Context, conn *websocket.Conn) error {
 				return err
 			}
 		case <-tick.C:
-			// TODO(03-02): real ping via conn.Ping(pingCtx) with
-			// h.opts.PingTimeout. Plan 03-01 keeps this a no-op so the
-			// ticker is wired but silent; the 1000-cycle goroutine-leak
-			// test does not depend on ping traffic.
+			pingCtx, cancel := context.WithTimeout(ctx, h.opts.PingTimeout)
+			err := conn.Ping(pingCtx)
+			cancel()
+			if err != nil {
+				if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+					return nil
+				}
+				h.logger.Debug("wshub: subscriber writer loop exited", "error", err.Error())
+				return err
+			}
 		case <-ctx.Done():
 			return nil
 		}

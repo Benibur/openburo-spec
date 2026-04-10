@@ -102,18 +102,49 @@ func (h *Hub) removeSubscriber(s *subscriber) {
 // Slow subscribers whose outbound buffer is full are kicked via
 // closeSlow rather than stalling the publisher.
 //
-// TODO(03-02): full non-blocking fan-out + Warn log lands in Plan 03-02.
-// In Plan 03-01 this is a no-op so the goroutine-leak test in
-// subscribe_test.go can run against a compilable package.
+// If the hub is closed, Publish is a silent no-op — it does not log,
+// fan out, or panic. This makes it safe for Phase 5's two-phase
+// shutdown to race with in-flight HTTP handlers.
+//
+// The `go` keyword on closeSlow is load-bearing: conn.Close has a
+// 5s+5s handshake budget, and we hold h.mu during the loop. Calling
+// closeSlow inline would block every other subscriber's enqueue.
 func (h *Hub) Publish(msg []byte) {
-	_ = msg
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closed {
+		return
+	}
+	for s := range h.subscribers {
+		select {
+		case s.msgs <- msg:
+			// queued
+		default:
+			// Slow consumer — log Warn, kick off-mutex via `go`.
+			h.logger.Warn("wshub: subscriber dropped (slow consumer)",
+				"buffer_size", h.opts.MessageBuffer)
+			go s.closeSlow()
+		}
+	}
 }
 
 // Close shuts down the hub, sending a StatusGoingAway close frame to
 // every active subscriber. Idempotent: a second call is a no-op.
 // Returns no error — graceful shutdown must not report failure.
 //
-// TODO(03-02): full close-with-StatusGoingAway + Info log + idempotent
-// closed-flag lands in Plan 03-02. In Plan 03-01 this is a no-op.
+// Close does NOT clear h.subscribers. Each writer loop observes its
+// conn close as a write error (or ctx.Done() cancellation from the
+// client-side TCP close) and calls `defer h.removeSubscriber(s)`.
+// Clearing the map here would race with those defers.
 func (h *Hub) Close() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closed {
+		return // idempotent: second call is a no-op
+	}
+	h.closed = true
+	h.logger.Info("wshub: closing hub", "subscribers", len(h.subscribers))
+	for s := range h.subscribers {
+		go s.closeGoingAway()
+	}
 }

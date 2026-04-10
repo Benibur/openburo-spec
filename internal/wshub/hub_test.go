@@ -79,7 +79,7 @@ func TestHub_SlowConsumerDropped(t *testing.T) {
 	srv := httptest.NewServer(subscribeHandler(hub))
 	defer srv.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	conn, _, err := websocket.Dial(ctx, srv.URL, nil)
@@ -94,8 +94,11 @@ func TestHub_SlowConsumerDropped(t *testing.T) {
 		hub.Publish([]byte("msg"))
 	}
 
-	// The slow subscriber must be kicked.
-	waitForSubscribers(t, hub, 0, time.Second)
+	// The slow subscriber must be kicked. closeSlow fires conn.Close
+	// (StatusPolicyViolation) which has a 5s+5s handshake budget when
+	// the peer never reads — we allow up to 7 seconds to let the
+	// handshake time out and the writer loop observe c.closed.
+	waitForSubscribers(t, hub, 0, 7*time.Second)
 }
 
 func TestHub_Close_GoingAway(t *testing.T) {
@@ -103,7 +106,7 @@ func TestHub_Close_GoingAway(t *testing.T) {
 	srv := httptest.NewServer(subscribeHandler(hub))
 	defer srv.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	conn, _, err := websocket.Dial(ctx, srv.URL, nil)
@@ -119,7 +122,11 @@ func TestHub_Close_GoingAway(t *testing.T) {
 	require.True(t, hub.closed, "Close must set h.closed = true")
 	hub.mu.Unlock()
 
-	waitForSubscribers(t, hub, 0, time.Second)
+	// closeGoingAway fires conn.Close(StatusGoingAway) which has the
+	// same 5s+5s handshake budget as closeSlow when the peer never
+	// reads — allow up to 7 seconds for the writer loop to observe
+	// c.closed and defer removeSubscriber.
+	waitForSubscribers(t, hub, 0, 7*time.Second)
 
 	// Second Close: idempotent no-op (must not panic).
 	require.NotPanics(t, func() { hub.Close() })
