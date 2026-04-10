@@ -88,3 +88,22 @@ describe('public API surface — Phase 2', () => {
     expect(result.kind).toBe('no-match');
   });
 });
+
+describe('public API surface — Phase 3', () => {
+  it('exports OpenBuroClient as a class', async () => {
+    const mod = await import('./index');
+    expect(typeof mod.OpenBuroClient).toBe('function');
+    // Constructor + validation smoke check (no async side effects)
+    expect(
+      () => new mod.OpenBuroClient({ capabilitiesUrl: 'https://example.com/caps' }),
+    ).not.toThrow();
+  });
+
+  it('OpenBuroClient.prototype has castIntent, getCapabilities, refreshCapabilities, destroy', async () => {
+    const { OpenBuroClient } = await import('./index');
+    expect(typeof OpenBuroClient.prototype.castIntent).toBe('function');
+    expect(typeof OpenBuroClient.prototype.getCapabilities).toBe('function');
+    expect(typeof OpenBuroClient.prototype.refreshCapabilities).toBe('function');
+    expect(typeof OpenBuroClient.prototype.destroy).toBe('function');
+  });
+});

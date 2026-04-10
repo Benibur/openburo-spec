@@ -60,3 +60,8 @@ export type {
 } from './messaging/bridge-adapter';
 export { MockBridge } from './messaging/mock-bridge';
 export { PenpalBridge } from './messaging/penpal-bridge';
+
+// ---- Phase 3: Orchestrator ----
+
+export type { OpenBuroClientOptions } from './client';
+export { OpenBuroClient } from './client';
