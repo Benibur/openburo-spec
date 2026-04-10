@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-02-store-persist-PLAN.md
-last_updated: "2026-04-10T09:55:33Z"
+stopped_at: Completed 02-03-capabilities-PLAN.md — Phase 2 complete
+last_updated: "2026-04-10T10:04:58.408Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -19,12 +19,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** A client app can discover, at any moment, which other apps can fulfill a given intent, and be notified instantly when that set changes.
-**Current focus:** Phase 02 — registry-core
+**Current focus:** Phase 02 — registry-core COMPLETE (ready for verification); Phase 03 next
 
 ## Current Position
 
-Phase: 02 (registry-core) — EXECUTING
-Plan: 3 of 3 (02-01-manifest-mime, 02-02-store-persist complete)
+Phase: 02 (registry-core) — COMPLETE (all 20 requirements implemented and tested)
+Plan: 3 of 3 complete (02-01-manifest-mime, 02-02-store-persist, 02-03-capabilities)
+Next: Phase 02 verification gate → Phase 03 (wshub)
 
 ## Performance Metrics
 
@@ -55,6 +56,7 @@ Plan: 3 of 3 (02-01-manifest-mime, 02-02-store-persist complete)
 | Phase 01-foundation P03 | 3min | 2 tasks | 4 files |
 | Phase 02-registry-core P01 | 15min | 2 tasks (TDD RED/GREEN) | 5 files (1 deleted) |
 | Phase 02-registry-core P02 | 3min | 2 tasks (TDD RED/GREEN) | 9 files (2 prod, 2 test, 5 fixtures) |
+| Phase 02-registry-core P03 | 2min | 1 (TDD RED/GREEN) tasks | 2 files files |
 
 ## Accumulated Context
 
@@ -86,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase 02-registry-core P02]: Rollback error phrase frozen as observable contract — error.Error() MUST contain "registry unchanged" when in-memory state is consistent with disk state after a persist failure; tests assert require.Contains on this exact substring so future refactors cannot drop the contract
 - [Phase 02-registry-core P02]: persistLocked step order — CreateTemp-in-same-dir -> Encode(SetIndent 2 spaces) -> Sync (contents) -> Close -> Rename -> dir fsync (best-effort); temp file Remove deferred unconditionally so failed writes never leak .tmp-* files
 - [Phase 02-registry-core P02]: Plan 02-02 concurrency test uses List/Get readers only (Capabilities doesn't exist yet) — Plan 02-03 will add the Capabilities concurrency test using the same RWMutex so correctness transfers
+- [Phase 02-registry-core]: Plan 02-03: Open Question 3 LOCKED — malformed filter.MimeType returns empty slice (not error); Phase 4 pre-validates via CanonicalizeMIME for 400 response
+- [Phase 02-registry-core]: Plan 02-03: Single canonicalization outside loop — filter.MimeType canonicalized once before manifest iteration; capability-side mimeTypes already canonical from Validate so mimeMatch compares two canonical inputs per call
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T09:55:33Z
-Stopped at: Completed 02-02-store-persist-PLAN.md
-Resume file: .planning/phases/02-registry-core/02-03-capabilities-PLAN.md
+Last session: 2026-04-10T10:04:51.871Z
+Stopped at: Completed 02-03-capabilities-PLAN.md — Phase 2 complete
+Resume file: None

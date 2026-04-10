@@ -30,10 +30,10 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### Capabilities
 
-- [ ] **CAP-01**: `Store.Capabilities(filter)` returns the flattened list of all capabilities across all manifests with `appId`, `appName`, `action`, `path`, `properties` fields
-- [ ] **CAP-02**: Capability results are sorted deterministically by `appName` (lowercased), with `appId`, `action`, and `path` as tiebreakers, so API responses are stable across restarts and platforms
-- [ ] **CAP-03**: Filtering by `action` returns only capabilities whose action matches the query value exactly
-- [ ] **CAP-04**: Filtering by `mimeType` supports **symmetric wildcard matching** across the full 3×3 matrix: `exact`, `type/*`, `*/*` on both the capability side and the query side
+- [x] **CAP-01**: `Store.Capabilities(filter)` returns the flattened list of all capabilities across all manifests with `appId`, `appName`, `action`, `path`, `properties` fields
+- [x] **CAP-02**: Capability results are sorted deterministically by `appName` (lowercased), with `appId`, `action`, and `path` as tiebreakers, so API responses are stable across restarts and platforms
+- [x] **CAP-03**: Filtering by `action` returns only capabilities whose action matches the query value exactly
+- [x] **CAP-04**: Filtering by `mimeType` supports **symmetric wildcard matching** across the full 3×3 matrix: `exact`, `type/*`, `*/*` on both the capability side and the query side
 - [x] **CAP-05**: MIME matching is covered by an exhaustive table-driven test over every 3×3 wildcard combination plus malformed input rejection
 
 ### Persistence
@@ -169,10 +169,10 @@ Populated during roadmap creation on 2026-04-09.
 | REG-06 | Phase 2 | Complete |
 | REG-07 | Phase 2 | Complete |
 | REG-08 | Phase 2 | Complete |
-| CAP-01 | Phase 2 | Pending |
-| CAP-02 | Phase 2 | Pending |
-| CAP-03 | Phase 2 | Pending |
-| CAP-04 | Phase 2 | Pending |
+| CAP-01 | Phase 2 | Complete |
+| CAP-02 | Phase 2 | Complete |
+| CAP-03 | Phase 2 | Complete |
+| CAP-04 | Phase 2 | Complete |
 | CAP-05 | Phase 2 | Complete |
 | PERS-01 | Phase 2 | Complete |
 | PERS-02 | Phase 2 | Complete |
