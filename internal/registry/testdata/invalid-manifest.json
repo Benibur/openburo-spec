@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "manifests": [
+    {
+      "id": "bad-app",
+      "name": "Bad",
+      "url": "javascript:alert(1)",
+      "version": "1.0.0",
+      "capabilities": [
+        {
+          "action": "PICK",
+          "path": "/pick",
+          "properties": {
+            "mimeTypes": ["*/*"]
+          }
+        }
+      ]
+    }
+  ]
+}
