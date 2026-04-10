@@ -68,7 +68,7 @@ Requirements flagged **[research]** were added after the research phase surfaced
 - [x] **IFR-04**: Sandbox attribute set to `allow-scripts allow-same-origin allow-forms allow-popups`
 - [x] **IFR-05**: `allow="clipboard-read; clipboard-write"`
 - [x] **IFR-06**: Iframe `title` attribute set from `capability.appName` (WCAG 2.4.1, ACT cae760) **[research]**
-- [x] **IFR-07**: Centered responsive styles: `min(90vw, 800px) × min(85vh, 600px)`, `border-radius: 8px`, subtle shadow
+- [x] **IFR-07**: Centered responsive styles with `position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%)`, `min(90vw, 800px) × min(85vh, 600px)`, `border-radius: 8px`, subtle shadow, and **`pointer-events: auto`** (mandatory — overrides the shadow host wrapper's `pointer-events: none` so clicks reach the iframe instead of falling through to the host page body). **[hotfix 0.1.1]**
 - [x] **IFR-08**: Constructor throws `OBCError { code: 'SAME_ORIGIN_CAPABILITY' }` if `new URL(capability.path).origin === location.origin` to prevent sandbox escape **[research]**
 - [x] **IFR-09**: Loading indicator overlay shown inside host backdrop until Penpal handshake completes **[research]**
 - [x] **IFR-10**: Body scroll lock while iframe/modal is open; restored on every close path **[research]**

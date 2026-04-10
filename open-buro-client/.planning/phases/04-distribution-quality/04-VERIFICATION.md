@@ -164,5 +164,27 @@ The phase goal is achieved:
 
 ---
 
+## Retroactive Note — 2026-04-10 (hotfix 0.1.1, same day)
+
+The Phase 4 verdict `passed 18/18` is retained, but a critical bug was discovered DURING the manual browser smoke test that the report explicitly flagged as "human verification deferred" (see below). The smoke test uncovered exactly the kind of gap the manual verification was meant to catch — validating the deferral rationale while also demonstrating why it needs to graduate to automated Playwright testing in v2.
+
+**Bug:** `src/ui/iframe.ts` was missing `position: fixed` and `pointer-events: auto` on the injected iframe's inline style. Result: capability iframes opened but every button click silently passed through to the host page body. All 9 iframe unit tests (Phase 2) plus all Phase 3 integration tests passed because happy-dom has no layout engine — you cannot observe CSS `pointer-events: none` cascade behavior without a real hit-tester.
+
+**Fix shipped as v0.1.1:**
+- `src/ui/iframe.ts` — added the two missing style properties
+- `src/ui/iframe.test.ts` — added 2 regression tests (grep-style, since happy-dom cannot test real hit-testing)
+- `02-RESEARCH.md` — added Pitfall 10 and Pitfall 11 with full rationale
+- `REQUIREMENTS.md` — IFR-07 text clarified to explicitly include `position: fixed` and `pointer-events: auto` as load-bearing
+- `CHANGELOG.md` — created with the 0.1.1 entry
+
+**Test count update:** 147 → 149 tests (two regression tests added).
+**CI status:** `pnpm run ci` still exits 0 after the fix.
+
+**Lesson for future milestones:** The `deferred to Playwright` annotation in `04-01-QA-AUDIT.md` was correct to exist but insufficient on its own. The "manual browser smoke test" item MUST happen before a milestone is marked complete, not after — or it must be converted to an automated Playwright test that runs in CI. This gap is now tracked for v2 in `PROJECT.md`.
+
+_Retroactive verification note added: 2026-04-10 after hotfix 0.1.1_
+
+---
+
 _Verified: 2026-04-10_
 _Verifier: Claude (gsd-verifier)_

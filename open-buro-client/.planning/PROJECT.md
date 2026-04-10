@@ -152,6 +152,12 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 | Dual-audience build: hackathon demo first, reference lib second | User confirmed during init. Implication: prioritize a working slice for the demo, but never cut corners on public API shape, types, or docs since the same code becomes the reference | — Pending |
 | UUID v4 for session ids | Stateless, collision-free, no coordination with server required | — Pending |
 | Library package name: `@openburo/client` | Matches ecosystem branding; scoped npm package | — Pending |
+| Iframe inline style MUST include `position:fixed` + `pointer-events:auto` (hotfix 0.1.1) | The shadow host wrapper uses `pointer-events:none` so empty fullscreen areas pass clicks through to the host page. CSS cascade: descendants of a `pointer-events:none` ancestor are also excluded from hit-testing unless they explicitly set `pointer-events:auto`. Without this, iframe clicks silently fall through to `body` and capability UIs appear frozen. Missed in Phase 2 unit tests because happy-dom has no layout engine. | ✓ Good |
+| Playwright smoke-test automation needed before v2 | Hotfix 0.1.1 proved that happy-dom unit tests cannot catch real-browser hit-testing, layout, or stacking-context bugs. The "manual browser smoke test" deferral in `04-VERIFICATION.md` is load-bearing and needs to graduate to automated CI. | ⚠️ Revisit in v2 |
+
+## Known Issues & Post-Milestone Fixes
+
+- **0.1.1 (2026-04-10)** — iframe interactivity hotfix. Phase 2 `IFR-07` requirement was implemented without `position:fixed` or `pointer-events:auto`, causing every capability iframe click to silently pass through to the host page body. Fixed by adding both properties to the inline style in `buildIframe()`. Two regression tests added (`iframe.test.ts`) that grep the raw style attribute. See `02-RESEARCH.md` Pitfalls 10 and 11, `CHANGELOG.md`, and both `02-VERIFICATION.md` and `04-VERIFICATION.md` retroactive notes.
 
 ---
-*Last updated: 2026-04-10 after Phase 4 (Distribution & Quality) completion — milestone v1.0 complete*
+*Last updated: 2026-04-10 after hotfix 0.1.1 (iframe pointer-events + positioning)*

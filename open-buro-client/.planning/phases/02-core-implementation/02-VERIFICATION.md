@@ -226,5 +226,24 @@ The `pnpm run ci` gate exits 0 with 112 tests across all 15 test files, typechec
 
 ---
 
+## Retroactive Note — 2026-04-10 post-milestone (hotfix 0.1.1)
+
+A browser smoke test after the milestone was marked "complete" revealed a critical bug in `src/ui/iframe.ts` that all 9 iframe unit tests missed: the iframe inline style was missing both `position: fixed` (centering) and `pointer-events: auto` (hit-testing override for the shadow host wrapper's `pointer-events: none` fullscreen overlay).
+
+**User-visible symptom:** capability iframes opened but buttons did nothing. The modal chooser worked fine (it has `pointer-events: auto` on `.obc-wrapper`), but the iframe itself was transparent to clicks and the capability UI appeared frozen.
+
+**Why unit tests missed it:** happy-dom has no layout engine and no hit-testing. `document.elementFromPoint()` in happy-dom cannot reproduce real CSS stacking behavior, so the `pointer-events: none` cascade from the shadow host wrapper to its iframe descendant was invisible to every happy-dom test. Only a real browser (or Playwright) reveals it.
+
+**What was fixed:**
+1. `src/ui/iframe.ts` — added `position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:auto;` to the inline style
+2. `src/ui/iframe.test.ts` — added 2 regression tests (grep-style assertions on the raw `style` attribute, since happy-dom cannot test hit-testing behavior — all we can do is prevent accidental removal)
+3. `02-RESEARCH.md` — added Pitfall 10 (iframe positioning) and Pitfall 11 (pointer-events cascade) to prevent the same mistake in the future
+
+**Phase 2 verdict remains PASSED for the 58 requirements** — IFR-07 is still logically covered, but the test coverage gap for real-browser hit-testing is now documented. Closing this gap fully requires a Playwright smoke test, which was already deferred to v2 in `02-VALIDATION.md` Manual-Only Verifications.
+
+_Retroactive verification note added: 2026-04-10 after hotfix 0.1.1_
+
+---
+
 _Verified: 2026-04-10T12:40:00Z_
 _Verifier: Claude (gsd-verifier)_

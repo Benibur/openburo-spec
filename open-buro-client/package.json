@@ -1,6 +1,6 @@
 {
   "name": "@openburo/client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Framework-agnostic browser library for OpenBuro intent brokering — discover capabilities, pick, round-trip via sandboxed iframe.",
   "keywords": [
     "openburo",
@@ -41,7 +41,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "scripts": {

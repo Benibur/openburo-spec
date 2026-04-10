@@ -1148,6 +1148,30 @@ The recommended Phase 2 approach: `penpal-bridge.test.ts` tests that `connect()`
 
 **Established in Phase 1 Summary:** Biome is configured to prefer double quotes. All string literals in new files must use double quotes. Exception: JSDoc comment strings (single quotes inside JSDoc triggered TS1002 in Phase 1 — use double quotes or avoid single quotes in JSDoc entirely).
 
+### Pitfall 10: Iframe Position Lost Without `position: fixed`
+
+**What goes wrong:** The spec says the iframe is "centered" (IFR-07), but the shadow host wrapper is already `position: fixed; inset: 0` (fullscreen). Inside that wrapper, an iframe with default `position: static` does NOT inherit centering — it lands at the top-left of the wrapper (which IS the viewport top-left). Result: a giant iframe glued to `(0, 0)` instead of centered in the viewport.
+
+**How to avoid:** Set `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%)` directly on the iframe's inline style via `setAttribute('style', ...)`. Do NOT rely on flex/grid on the shadow host — that complicates the wrapper's transparent-click-through behavior (see Pitfall 11).
+
+**Test pattern:** In happy-dom, assert that the raw `style` attribute contains `position:fixed` and `transform:translate(-50%,-50%)`. Happy-dom has no layout engine, so you can't assert the computed rect — the grep-level assertion is all you get until Playwright.
+
+### Pitfall 11: `pointer-events: none` Cascades to Iframe Descendants (the 0.1.1 Hotfix)
+
+**What goes wrong:** The shadow host element (see `ui/styles.ts`) is a `position: fixed; inset: 0` fullscreen wrapper with `pointer-events: none` — intentional, so that clicks on empty areas fall through to the host page instead of being swallowed by the invisible overlay. CSS spec for `pointer-events: none` is subtle: **when an ancestor has `pointer-events: none`, ALL its descendants are excluded from hit-testing too** — not because `pointer-events` is inherited (it isn't), but because the hit-test algorithm itself stops at the `none` ancestor. The ONLY way to re-enable hit-testing on a descendant is to explicitly set `pointer-events: auto` on that descendant.
+
+The iframe injected by `buildIframe()` is a descendant of the shadow host. Without explicit `pointer-events: auto` on the iframe's inline style, clicks on the iframe silently pass through to the host page's body. The capability UI appears completely inert: buttons don't respond, Penpal RPC never fires, the modal acts like a frozen screenshot.
+
+**Why unit tests missed it:** Happy-dom has no layout engine and no hit-testing. `document.elementFromPoint(x, y)` in happy-dom returns `null` or a fake value unrelated to real stacking. You cannot observe this bug in happy-dom — only a real browser (or Playwright) reveals it.
+
+**How to detect early:** Run the demo in Chrome/Firefox. If capability buttons don't respond, open DevTools → Elements → hover the iframe → check the computed `pointer-events` value. If it says `none`, you hit this pitfall.
+
+**How to fix:** Add `pointer-events: auto;` to the iframe's inline `style` attribute in `buildIframe()`. Do NOT remove this even if "it doesn't seem to do anything" — happy-dom cannot validate its effect, but it is load-bearing in every real browser.
+
+**How to prevent regression:** Assert the literal `pointer-events:auto` in the raw `style` attribute in `iframe.test.ts`. This is a grep-level test (not a real hit-test), but it prevents accidental removal via refactor or autoformat.
+
+**Phase mapping:** Discovered retroactively in Phase 4 browser smoke-test after the v1.0 milestone was marked complete. Fix shipped as v0.1.1 hotfix; tests added to prevent regression.
+
 ---
 
 ## ActiveSession Type

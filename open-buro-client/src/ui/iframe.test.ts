@@ -102,4 +102,24 @@ describe('buildIframe', () => {
     expect(rawStyle).toContain('height:min(85vh,600px)');
     expect(rawStyle).toContain('border-radius:8px');
   });
+
+  // Regression: 0.1.1 hotfix — iframe must override the shadow host's
+  // pointer-events:none wrapper. Without these two rules, clicks on the
+  // iframe silently fall through to the body behind it in a real browser
+  // (happy-dom has no layout engine so it cannot observe the hit-testing
+  // failure — we assert the raw style attribute as a grep-level proxy).
+  it('sets pointer-events:auto to override shadow host wrapper (0.1.1 regression)', () => {
+    const el = buildIframe(crossOriginCap, defaultParams);
+    const rawStyle = el.getAttribute('style') ?? '';
+    expect(rawStyle).toContain('pointer-events:auto');
+  });
+
+  it('sets position:fixed + centered translate for viewport centering (0.1.1 regression)', () => {
+    const el = buildIframe(crossOriginCap, defaultParams);
+    const rawStyle = el.getAttribute('style') ?? '';
+    expect(rawStyle).toContain('position:fixed');
+    expect(rawStyle).toContain('top:50%');
+    expect(rawStyle).toContain('left:50%');
+    expect(rawStyle).toContain('transform:translate(-50%,-50%)');
+  });
 });

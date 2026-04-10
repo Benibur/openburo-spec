@@ -53,15 +53,37 @@ export function buildIframe(capability: Capability, params: IframeParams): HTMLI
   iframe.title = capability.appName;
 
   // IFR-07: centered responsive sizing
-  // Use setAttribute to preserve min() values; style.cssText normalizes them away in some DOM impls
+  // Use setAttribute to preserve min() values; style.cssText normalizes them away in some DOM impls.
+  //
+  // Two load-bearing rules (DO NOT REMOVE — see CHANGELOG 0.1.1 and 02-RESEARCH.md Pitfall 11):
+  //
+  //   1. position:fixed + top/left/transform centers the iframe in the viewport
+  //      independent of the shadow host wrapper's layout. Without position:fixed,
+  //      the iframe renders at (0,0) in the top-left corner because the fixed
+  //      shadow-host wrapper does not provide flex/grid centering.
+  //
+  //   2. pointer-events:auto is MANDATORY. The shadow host (see ui/styles.ts)
+  //      uses pointer-events:none on its fullscreen wrapper so clicks on empty
+  //      areas fall through to the host page. CSS spec: when an ancestor has
+  //      pointer-events:none, ALL its descendants are also excluded from
+  //      hit-testing unless they explicitly set pointer-events:auto.
+  //      Without this line, every click on the iframe silently passes through
+  //      to the element behind it — capability UIs appear completely inert.
+  //      Happy-dom unit tests cannot catch this because happy-dom has no
+  //      layout/hit-testing engine; only real browsers (or Playwright) reveal it.
   iframe.setAttribute(
     'style',
-    'display:block;' +
+    'position:fixed;' +
+      'top:50%;' +
+      'left:50%;' +
+      'transform:translate(-50%,-50%);' +
+      'display:block;' +
       'width:min(90vw,800px);' +
       'height:min(85vh,600px);' +
       'border:none;' +
       'border-radius:8px;' +
-      'box-shadow:0 4px 32px rgba(0,0,0,0.24);',
+      'box-shadow:0 4px 32px rgba(0,0,0,0.24);' +
+      'pointer-events:auto;',
   );
 
   return iframe;

@@ -427,13 +427,28 @@ From 02-CONTEXT.md (user-confirmed):
       iframe.title = capability.appName;
 
       // IFR-07: centered responsive sizing
-      iframe.style.cssText =
-        "display:block;" +
-        "width:min(90vw,800px);" +
-        "height:min(85vh,600px);" +
-        "border:none;" +
-        "border-radius:8px;" +
-        "box-shadow:0 4px 32px rgba(0,0,0,0.24);";
+      // Two load-bearing rules (see 02-RESEARCH.md Pitfall 10 + Pitfall 11):
+      //   - position:fixed + translate centers in viewport (the shadow host wrapper
+      //     is fullscreen but does not center its children)
+      //   - pointer-events:auto is MANDATORY to override the shadow host's
+      //     pointer-events:none wrapper (hotfix 0.1.1). Without it, clicks pass
+      //     through to the body and capability buttons become inert.
+      // Use setAttribute('style', ...) not style.cssText — some DOM impls normalize
+      // min() values away when assigned via cssText.
+      iframe.setAttribute(
+        "style",
+        "position:fixed;" +
+          "top:50%;" +
+          "left:50%;" +
+          "transform:translate(-50%,-50%);" +
+          "display:block;" +
+          "width:min(90vw,800px);" +
+          "height:min(85vh,600px);" +
+          "border:none;" +
+          "border-radius:8px;" +
+          "box-shadow:0 4px 32px rgba(0,0,0,0.24);" +
+          "pointer-events:auto;",
+      );
 
       return iframe;
     }
@@ -468,10 +483,15 @@ From 02-CONTEXT.md (user-confirmed):
     - `src/ui/iframe.ts` contains the literal `clipboard-read; clipboard-write`
     - `src/ui/iframe.ts` contains the literal `width:min(90vw,800px)`
     - `src/ui/iframe.ts` contains the literal `border-radius:8px`
+    - `src/ui/iframe.ts` contains the literal `position:fixed` (hotfix 0.1.1 — viewport centering)
+    - `src/ui/iframe.ts` contains the literal `transform:translate(-50%,-50%)` (hotfix 0.1.1)
+    - `src/ui/iframe.ts` contains the literal `pointer-events:auto` (hotfix 0.1.1 — overrides shadow host pointer-events:none)
     - `src/ui/iframe.ts` does NOT contain the literal `innerHTML`
     - `src/ui/iframe.ts` does NOT contain the literal `penpal`
     - `src/ui/iframe.test.ts` first line contains `@vitest-environment happy-dom`
-    - `src/ui/iframe.test.ts` contains at least 8 `it(` or `test(` calls
+    - `src/ui/iframe.test.ts` contains at least 10 `it(` or `test(` calls (8 original + 2 regression tests for hotfix 0.1.1)
+    - `src/ui/iframe.test.ts` contains the literal `pointer-events:auto` (regression guard)
+    - `src/ui/iframe.test.ts` contains the literal `position:fixed` (regression guard)
     - `pnpm vitest run src/ui/iframe.test.ts` exits 0
     - `pnpm typecheck` exits 0
     - `pnpm lint` exits 0
