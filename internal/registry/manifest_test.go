@@ -15,8 +15,8 @@ func validManifest() Manifest {
 		Version: "1.0.0",
 		Capabilities: []Capability{
 			{
-				Action: "PICK",
-				Path:   "/pick",
+				Action:     "PICK",
+				Path:       "/pick",
 				Properties: CapabilityProps{MimeTypes: []string{"text/plain", "image/png"}},
 			},
 		},

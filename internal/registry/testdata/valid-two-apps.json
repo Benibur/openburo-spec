@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "manifests": [
+    {
+      "id": "files-app",
+      "name": "Files",
+      "url": "https://files.example.com",
+      "version": "2.1.0",
+      "capabilities": [
+        {
+          "action": "PICK",
+          "path": "/pick",
+          "properties": {
+            "mimeTypes": ["*/*"]
+          }
+        },
+        {
+          "action": "SAVE",
+          "path": "/save",
+          "properties": {
+            "mimeTypes": ["*/*"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mail-app",
+      "name": "Mail",
+      "url": "https://mail.example.com",
+      "version": "1.0.0",
+      "capabilities": [
+        {
+          "action": "SAVE",
+          "path": "/attach",
+          "properties": {
+            "mimeTypes": ["image/png", "text/plain"]
+          }
+        }
+      ]
+    }
+  ]
+}
