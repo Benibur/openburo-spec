@@ -54,10 +54,10 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### HTTP API
 
-- [ ] **API-01**: `POST /api/v1/registry` upserts a manifest — returns `201 Created` on create, `200 OK` on update, `400 Bad Request` on invalid payload, `401 Unauthorized` without valid auth
-- [ ] **API-02**: `DELETE /api/v1/registry/{appId}` deletes a manifest — returns `204 No Content`, `404 Not Found`, or `401 Unauthorized`
-- [ ] **API-03**: `GET /api/v1/registry` returns all manifests with `{ manifests: [...], count: N }` shape
-- [ ] **API-04**: `GET /api/v1/registry/{appId}` returns one manifest or `404 Not Found`
+- [x] **API-01**: `POST /api/v1/registry` upserts a manifest — returns `201 Created` on create, `200 OK` on update, `400 Bad Request` on invalid payload, `401 Unauthorized` without valid auth
+- [x] **API-02**: `DELETE /api/v1/registry/{appId}` deletes a manifest — returns `204 No Content`, `404 Not Found`, or `401 Unauthorized`
+- [x] **API-03**: `GET /api/v1/registry` returns all manifests with `{ manifests: [...], count: N }` shape
+- [x] **API-04**: `GET /api/v1/registry/{appId}` returns one manifest or `404 Not Found`
 - [ ] **API-05**: `GET /api/v1/capabilities` returns aggregated capabilities with `{ capabilities: [...], count: N }` shape, supporting `?action=` and `?mimeType=` query params
 - [x] **API-06**: Routes are registered using Go 1.22+ `http.ServeMux` method patterns (no third-party router)
 - [x] **API-07**: Middleware chain wraps handlers in order: recover → log → CORS → (per-route) auth
@@ -72,11 +72,11 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **WS-02**: Centralized hub pattern: `Hub` holds subscribers map under a mutex, `subscriber` has a buffered outbound channel (default 16)
 - [x] **WS-03**: Non-blocking fan-out: publishing to a slow subscriber whose buffer is full triggers `closeSlow` (drop the client) rather than blocking the publisher
 - [x] **WS-04**: Each subscriber calls `conn.CloseRead(ctx)` so control frames are handled and closed clients are detected (prevents goroutine leaks)
-- [ ] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
+- [x] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
 - [ ] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
 - [x] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
 - [ ] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
-- [ ] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
+- [x] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
 - [x] **WS-10**: Goroutine leak integration test: 1000 connect/disconnect cycles leave `runtime.NumGoroutine()` flat (±epsilon)
 
 ### Operations
@@ -86,7 +86,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [ ] **OPS-03**: Signal-aware graceful shutdown: `signal.NotifyContext` listens for `SIGTERM`/`SIGINT`
 - [ ] **OPS-04**: **Two-phase shutdown**: `httpSrv.Shutdown(ctx)` first, then `hub.Close()` which sends `StatusGoingAway` close frames to every WebSocket client
 - [ ] **OPS-05**: Optional TLS termination when `server.tls.enabled = true` using `ListenAndServeTLS` with cert and key paths from config
-- [ ] **OPS-06**: Write operations emit a structured audit log line (`slog.Info("audit", "user", …, "action", …, "appId", …)`) without leaking credentials
+- [x] **OPS-06**: Write operations emit a structured audit log line (`slog.Info("audit", "user", …, "action", …, "appId", …)`) without leaking credentials
 
 ### Testing & Quality
 
@@ -184,10 +184,10 @@ Populated during roadmap creation on 2026-04-09.
 | AUTH-03 | Phase 4 | Complete |
 | AUTH-04 | Phase 4 | Complete |
 | AUTH-05 | Phase 4 | Complete |
-| API-01 | Phase 4 | Pending |
-| API-02 | Phase 4 | Pending |
-| API-03 | Phase 4 | Pending |
-| API-04 | Phase 4 | Pending |
+| API-01 | Phase 4 | Complete |
+| API-02 | Phase 4 | Complete |
+| API-03 | Phase 4 | Complete |
+| API-04 | Phase 4 | Complete |
 | API-05 | Phase 4 | Pending |
 | API-06 | Phase 4 | Complete |
 | API-07 | Phase 4 | Complete |
@@ -199,18 +199,18 @@ Populated during roadmap creation on 2026-04-09.
 | WS-02 | Phase 3 | Complete |
 | WS-03 | Phase 3 | Complete |
 | WS-04 | Phase 3 | Complete |
-| WS-05 | Phase 4 | Pending |
+| WS-05 | Phase 4 | Complete |
 | WS-06 | Phase 4 | Pending |
 | WS-07 | Phase 3 | Complete |
 | WS-08 | Phase 4 | Pending |
-| WS-09 | Phase 4 | Pending |
+| WS-09 | Phase 4 | Complete |
 | WS-10 | Phase 3 | Complete |
 | OPS-01 | Phase 4 | Pending |
 | OPS-02 | Phase 5 | Pending |
 | OPS-03 | Phase 5 | Pending |
 | OPS-04 | Phase 5 | Pending |
 | OPS-05 | Phase 5 | Pending |
-| OPS-06 | Phase 4 | Pending |
+| OPS-06 | Phase 4 | Complete |
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 4 | Pending |
 | TEST-03 | Phase 5 | Pending |

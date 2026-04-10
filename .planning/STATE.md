@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-02-auth-credentials-PLAN.md
-last_updated: "2026-04-10T12:52:00Z"
+stopped_at: Completed 04-03-registry-handlers-PLAN.md
+last_updated: "2026-04-10T13:19:49Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 14
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 04 (http-api) — EXECUTING
-Plan: 3 of 5 (Plans 04-01, 04-02 complete)
+Plan: 4 of 5 (Plans 04-01, 04-02, 04-03 complete)
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Plan: 3 of 5 (Plans 04-01, 04-02 complete)
 | Phase 03-websocket-hub P03 | 5min | 2 tasks | 2 files |
 | Phase 04-http-api P01 | 5min | 2 tasks | 8 files |
 | Phase 04-http-api P02 | 7min | 3 tasks (chore + TDD RED/GREEN) | 10 files (2 prod, 2 test, 3 fixtures, 1 modified, 2 go.mod/sum) |
+| Phase 04-http-api P03 | 7min | 2 tasks (TDD RED/GREEN) | 6 files (2 prod, 2 test, 2 modified) |
 
 ## Accumulated Context
 
@@ -122,6 +123,12 @@ Recent decisions affecting current work:
 - [Phase 04-http-api]: Plan 04-02: testdata fixtures (credentials-valid.yaml cost-12, credentials-low-cost.yaml cost-10, credentials-malformed.yaml broken YAML) checked into git — fast test startup vs generating hashes at runtime
 - [Phase 04-http-api]: Plan 04-02: [Rule 3 deviation, test-runner only] Plan's `-timeout 30s` was insufficient under -race because bcrypt cost-12 takes ~2s per verification under the race detector (vs ~150ms normally); full Auth suite takes ~32s. Raised to 120s for the plan-specific sweep and 180s for the full httpapi sweep. No source code change
 - [Phase 04-http-api]: Plan 04-02: golang.org/x/crypto v0.50.0 flipped from indirect to direct in Task 2 GREEN (auth.go + credentials.go import bcrypt from production code); Task 0 `go mod tidy` removed it because fixture generation ran via one-shot `go run /tmp/genhash*.go` outside the module (expected indirect/direct dance, no anchor file needed)
+- [Phase 04-http-api]: Plan 04-03: Mutation-then-broadcast (PITFALLS #1) locked at the handler layer — in handleRegistryUpsert, s.store.Upsert(manifest) must return nil BEFORE s.hub.Publish(newRegistryUpdatedEvent(...)) fires; same for handleRegistryDelete. Ordering verified statically via awk+grep over the handler body (Upsert line 30 < Publish line 46; Delete line 10 < Publish line 24) AND behaviorally via TestServer_AuditLog (audit log runs after publish in source order, so observing audit implies publish fired)
+- [Phase 04-http-api]: Plan 04-03: eventPayload struct shared between upsert/delete events (this plan) and snapshot events (plan 04-04) via two omitempty fields — AppID set on upsert/delete, Capabilities set on snapshot, changeSnapshot constant pre-declared here so plan 04-04 only writes newSnapshotEvent helper
+- [Phase 04-http-api]: Plan 04-03: OPS-06 audit log is a SEPARATE s.logger.Info call from the request log (logMiddleware) — two log lines per authenticated write request (request log: method/path/status/duration, audit log: user/action/appId). Audit fires AFTER publish so observing the audit line is structural evidence that publish ran. PII-free by construction: TestServer_AuditLog asserts NotContains for testpass/YWRtaW46/$2a$/Basic YWRt
+- [Phase 04-http-api]: Plan 04-03: API-11 body hygiene pattern — defer r.Body.Close() in every handler + http.MaxBytesReader(w, r.Body, 1<<20) on POST + json.Decoder.DisallowUnknownFields. TestHandlers_BodyClosed does 3 sequential POSTs on the same client (forces connection reuse); TestHandleRegistryUpsert_BodyTooLarge posts 2 MiB and expects 400
+- [Phase 04-http-api]: Plan 04-03: 201-vs-200 on upsert is advisory, not linearizable — the existence check runs OUTSIDE the store's mutex and may observe stale state under concurrent Delete; the API-01 contract only requires the status code to be one of {201, 200} on success, not which one in the face of races
+- [Phase 04-http-api]: Plan 04-03: [Rule 1 deviation] go vet caught `r, _ := ts.Client().Get(...)` in TestHandleRegistryDelete_Existing; fix was a single-line `, _ :=` -> `, err := ... require.NoError(t, err)` correction in test code. Plan's production code specs were byte-accurate — the only drift was one test line vet flagged
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -140,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T12:52:00Z
-Stopped at: Completed 04-02-auth-credentials-PLAN.md
+Last session: 2026-04-10T13:19:49Z
+Stopped at: Completed 04-03-registry-handlers-PLAN.md
 Resume file: None
