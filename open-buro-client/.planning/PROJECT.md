@@ -29,6 +29,16 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 - ✓ UI layer: Shadow DOM host (z-index on light DOM), iframe factory with same-origin guard + WCAG `title` + sandbox, Shadow-DOM-aware focus trap, chooser modal with full a11y baseline (role/aria, ESC, backdrop, arrow-keys/Home/End/Enter, focus restore, body scroll lock, 150ms spinner delay) — 41 tests — validated in Phase 2
 - ✓ Messaging layer: `BridgeAdapter` interface, `MockBridge` test double, `PenpalBridge` using verified Penpal v7 `connect({ messenger: new WindowMessenger(...) })` API — 15 tests, Penpal imported from exactly one file — validated in Phase 2
 
+**Orchestration (Phase 3)** — public API working end-to-end. 147 tests total, `pnpm run ci` green.
+- ✓ `OpenBuroClient` facade class — the only file in the codebase permitted to cross layer boundaries — validated in Phase 3
+- ✓ Constructor validation (https/wss + localhost allow); zero async side-effects — validated in Phase 3
+- ✓ Lazy capability fetch with single-flight promise cache; WS listener wired on first successful fetch — validated in Phase 3
+- ✓ `castIntent()` full orchestration: lazy fetch → planCast → modal/direct → iframe → bridge → session map + watchdog — validated in Phase 3
+- ✓ Leak-free `destroy()` via `createAbortContext()`: idempotent, cancels all active sessions, tears down DOM/WS/bridge — validated in Phase 3
+- ✓ Post-destroy semantics: `castIntent` rejects with `DESTROYED`, `getCapabilities` returns `[]`, `refreshCapabilities` rejects — validated in Phase 3
+- ✓ Two concurrent `OpenBuroClient` instances verified isolated (no shared state) — validated in Phase 3
+- ✓ `DESTROYED` added to `OBCErrorCode` union — validated in Phase 3
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -133,4 +143,4 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 | Library package name: `@openburo/client` | Matches ecosystem branding; scoped npm package | — Pending |
 
 ---
-*Last updated: 2026-04-10 after Phase 2 (Core Implementation) completion*
+*Last updated: 2026-04-10 after Phase 3 (Orchestration) completion*

@@ -98,12 +98,12 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### OpenBuroClient Orchestrator
 
-- [ ] **ORCH-01**: `new OpenBuroClient(options)` constructs an instance; constructor validates `capabilitiesUrl` is `https://`
-- [ ] **ORCH-02**: Constructor performs no async side effects; capability fetch happens on first use or explicit `refreshCapabilities()`
-- [ ] **ORCH-03**: Multiple OBC instances can exist simultaneously without cross-talk
-- [ ] **ORCH-04**: `destroy()` aborts all in-flight fetches, closes the WebSocket, tears down every Penpal connection, removes every injected DOM element, restores body scroll, and nulls session state
-- [ ] **ORCH-05**: `destroy()` uses `AbortController` as the single teardown mechanism; all listeners attach with `{ signal }` **[research]**
-- [ ] **ORCH-06**: After `destroy()`, calls to public methods throw or no-op predictably (no silent failure)
+- [x] **ORCH-01**: `new OpenBuroClient(options)` constructs an instance; constructor validates `capabilitiesUrl` is `https://`
+- [x] **ORCH-02**: Constructor performs no async side effects; capability fetch happens on first use or explicit `refreshCapabilities()`
+- [x] **ORCH-03**: Multiple OBC instances can exist simultaneously without cross-talk
+- [x] **ORCH-04**: `destroy()` aborts all in-flight fetches, closes the WebSocket, tears down every Penpal connection, removes every injected DOM element, restores body scroll, and nulls session state
+- [x] **ORCH-05**: `destroy()` uses `AbortController` as the single teardown mechanism; all listeners attach with `{ signal }` **[research]**
+- [x] **ORCH-06**: After `destroy()`, calls to public methods throw or no-op predictably (no silent failure)
 
 ### Packaging & Distribution
 
@@ -240,12 +240,12 @@ Explicitly excluded. Documented to prevent scope creep.
 | MSG-04 | Phase 2 | Complete |
 | MSG-05 | Phase 2 | Complete |
 | MSG-06 | Phase 2 | Complete |
-| ORCH-01 | Phase 3 | Pending |
-| ORCH-02 | Phase 3 | Pending |
-| ORCH-03 | Phase 3 | Pending |
-| ORCH-04 | Phase 3 | Pending |
-| ORCH-05 | Phase 3 | Pending |
-| ORCH-06 | Phase 3 | Pending |
+| ORCH-01 | Phase 3 | Complete |
+| ORCH-02 | Phase 3 | Complete |
+| ORCH-03 | Phase 3 | Complete |
+| ORCH-04 | Phase 3 | Complete |
+| ORCH-05 | Phase 3 | Complete |
+| ORCH-06 | Phase 3 | Complete |
 | PKG-01 | Phase 4 | Pending |
 | PKG-02 | Phase 4 | Pending |
 | PKG-03 | Phase 4 | Pending |
