@@ -26,8 +26,8 @@ All gray areas were resolved by Claude's discretion at the user's direction ("d�
 
 - **CI platform:** GitHub Actions — `.github/workflows/ci.yml` runs on push and pull_request.
 - **CI jobs (single workflow, one job with steps):**
-  1. `actions/checkout@v4`
-  2. `actions/setup-go@v5` with `go-version: '1.26'`
+  1. `actions/checkout@v6` *(revised 2026-04-10 from `@v4` — `@v4` runs on Node 20, which hits EOL June 2026)*
+  2. `actions/setup-go@v6` with `go-version: '1.26'` *(revised 2026-04-10 from `@v5` — same Node 20 EOL rationale)*
   3. `go mod download`
   4. `gofmt -l .` — fails if any file needs formatting
   5. `go vet ./...`
@@ -272,3 +272,4 @@ registry.json
 
 *Phase: 01-foundation*
 *Context gathered: 2026-04-10*
+*Revised: 2026-04-10 — GitHub Actions versions bumped to `checkout@v6` / `setup-go@v6` (Node 20 EOL June 2026)*

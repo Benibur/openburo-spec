@@ -38,6 +38,8 @@ created: 2026-04-10
 
 Task IDs follow the convention `{phase}-{plan}-{task}`. Plan and task numbers will be finalized by the planner; the requirement→verification mapping below is authoritative regardless of how tasks are sliced.
 
+> **Note on test naming:** The `-run` patterns and individual fixture filenames in this table are *illustrative*. Plans are free to consolidate into table-driven subtests (e.g. a single `TestLoad` with subtests like `invalid-log-format`, `missing-credentials-file`) as long as every behavior in this table is covered. The authoritative invocation for the config package is `go test ./internal/config -race -count=1`, which runs every subtest regardless of naming convention.
+
 | Requirement | Behavior | Test Type | Automated Command | Wave 0 File | Status |
 |-------------|----------|-----------|-------------------|-------------|--------|
 | FOUND-01 | `go build ./...` succeeds on Go 1.26 with pinned deps | Build | `go build ./...` (exit 0) | ✅ scaffold + go.mod | ⬜ pending |
