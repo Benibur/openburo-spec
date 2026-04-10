@@ -3,14 +3,14 @@ description: Inter-App Communication via Intents & Capabilities — File Picker
 remote_theme: just-the-docs/just-the-docs
 
 url: ""
-baseurl: "/openburo-spec"
+baseurl: "/TechSprint-n-01-april-20206-FilePicker"
 
 plugins:
   - jekyll-remote-theme
 
 aux_links:
   "GitHub":
-    - "https://github.com/Benibur/openburo-spec"
+    - "https://github.com/openburo/TechSprint-n-01-april-20206-FilePicker"
 
 nav_enabled: true
 search_enabled: true
