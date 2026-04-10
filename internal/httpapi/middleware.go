@@ -9,6 +9,8 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+
+	"github.com/rs/cors"
 )
 
 // statusCapturingWriter is a tiny wrapper around http.ResponseWriter that
@@ -90,11 +92,25 @@ func (s *Server) logMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// corsMiddleware is a Plan 04-01 PLACEHOLDER pass-through. Plan 04-05
-// replaces this with the real rs/cors wrap driven by s.cfg.AllowedOrigins.
-// It is declared here so the middleware chain order is locked from day one.
+// corsMiddleware wraps next with the rs/cors handler, driven by
+// s.cfg.AllowedOrigins. The allow-list is SHARED with coder/websocket's
+// AcceptOptions.OriginPatterns in handleCapabilitiesWS, so a browser client
+// that can call the REST API can also connect to the WebSocket endpoint
+// (WS-08 shared allow-list contract).
+//
+// Construction note: rs/cors v1.11.1 does NOT reject the
+// `AllowedOrigins: ["*"] + AllowCredentials: true` combination here —
+// Server.New has already rejected that combination at construction time,
+// so this path only ever sees a safe allow-list.
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
-	return next
+	c := cors.New(cors.Options{
+		AllowedOrigins:   s.cfg.AllowedOrigins,
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	})
+	return c.Handler(next)
 }
 
 // clientIP returns the client's IP for logging. Respects X-Forwarded-For

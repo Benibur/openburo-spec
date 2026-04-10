@@ -284,7 +284,11 @@ func TestServer_CORS_Headers(t *testing.T) {
 	req, _ := http.NewRequest(http.MethodOptions, ts.URL+"/api/v1/registry", nil)
 	req.Header.Set("Origin", "https://allowed.example")
 	req.Header.Set("Access-Control-Request-Method", "POST")
-	req.Header.Set("Access-Control-Request-Headers", "Authorization,Content-Type")
+	// rs/cors v1.11.1 requires the header list to be lowercase and sorted
+	// lexicographically (per the Fetch spec's CORS-unsafe request-header
+	// names normalization). "authorization,content-type" is what a real
+	// browser would send.
+	req.Header.Set("Access-Control-Request-Headers", "authorization,content-type")
 	resp, err := c.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
