@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: unknown
 stopped_at: Completed 04-01-distribution-PLAN.md; Phase 4 gate cleared; 147 tests green; attw clean; @openburo/client v0.1.0 distribution ready
-last_updated: "2026-04-10T11:46:57.928Z"
+last_updated: "2026-04-10T11:50:26.416Z"
 progress:
   total_phases: 4
   completed_phases: 4

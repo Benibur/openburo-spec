@@ -39,6 +39,17 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 - ✓ Two concurrent `OpenBuroClient` instances verified isolated (no shared state) — validated in Phase 3
 - ✓ `DESTROYED` added to `OBCErrorCode` union — validated in Phase 3
 
+**Distribution & Quality (Phase 4)** — v1 ready for publication. Milestone v1.0 complete.
+- ✓ ESM (`dist/index.js`), CJS (`dist/index.cjs`), UMD (`dist/index.umd.js`) builds produced by tsdown two-array config — validated in Phase 4
+- ✓ TypeScript declarations (`dist/index.d.ts` + `dist/index.d.cts`) with nested `types` per exports condition — validated in Phase 4
+- ✓ `@arethetypeswrong/cli` green across all 4 resolution modes (node10, node16 CJS, node16 ESM, bundler) — on source and on packed tarball — validated in Phase 4
+- ✓ `docs/capability-authors.md` — 209-line integration guide documenting Penpal v7 contract, WindowMessenger API, resolve() signature, minimal skeleton, security expectations — validated in Phase 4
+- ✓ `README.md` with install + usage + link to integration guide — validated in Phase 4
+- ✓ `LICENSE` (MIT 2026) — validated in Phase 4
+- ✓ `package.json` metadata (description, keywords, license, repository, homepage, bugs, files) — validated in Phase 4
+- ✓ QA audit: all 10 QA requirements map to concrete passing tests — validated in Phase 4
+- ✓ Full CI pipeline green: `pnpm run ci && pnpm pack && attw --pack` — validated in Phase 4
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -143,4 +154,4 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 | Library package name: `@openburo/client` | Matches ecosystem branding; scoped npm package | — Pending |
 
 ---
-*Last updated: 2026-04-10 after Phase 3 (Orchestration) completion*
+*Last updated: 2026-04-10 after Phase 4 (Distribution & Quality) completion — milestone v1.0 complete*
