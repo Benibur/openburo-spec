@@ -69,9 +69,9 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 ### WebSocket
 
 - [ ] **WS-01**: `GET /api/v1/capabilities/ws` upgrades to WebSocket using `coder/websocket`
-- [ ] **WS-02**: Centralized hub pattern: `Hub` holds subscribers map under a mutex, `subscriber` has a buffered outbound channel (default 16)
+- [x] **WS-02**: Centralized hub pattern: `Hub` holds subscribers map under a mutex, `subscriber` has a buffered outbound channel (default 16)
 - [ ] **WS-03**: Non-blocking fan-out: publishing to a slow subscriber whose buffer is full triggers `closeSlow` (drop the client) rather than blocking the publisher
-- [ ] **WS-04**: Each subscriber calls `conn.CloseRead(ctx)` so control frames are handled and closed clients are detected (prevents goroutine leaks)
+- [x] **WS-04**: Each subscriber calls `conn.CloseRead(ctx)` so control frames are handled and closed clients are detected (prevents goroutine leaks)
 - [ ] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
 - [ ] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
 - [ ] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
@@ -196,9 +196,9 @@ Populated during roadmap creation on 2026-04-09.
 | API-10 | Phase 4 | Pending |
 | API-11 | Phase 4 | Pending |
 | WS-01 | Phase 4 | Pending |
-| WS-02 | Phase 3 | Pending |
+| WS-02 | Phase 3 | Complete |
 | WS-03 | Phase 3 | Pending |
-| WS-04 | Phase 3 | Pending |
+| WS-04 | Phase 3 | Complete |
 | WS-05 | Phase 4 | Pending |
 | WS-06 | Phase 4 | Pending |
 | WS-07 | Phase 3 | Pending |
