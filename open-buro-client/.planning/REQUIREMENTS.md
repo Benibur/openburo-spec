@@ -107,27 +107,27 @@ Requirements flagged **[research]** were added after the research phase surfaced
 
 ### Packaging & Distribution
 
-- [ ] **PKG-01**: ESM build output `dist/obc.esm.js`
-- [ ] **PKG-02**: CommonJS build output `dist/obc.cjs.js`
-- [ ] **PKG-03**: UMD build output `dist/obc.umd.js` — importable via `<script>` from a CDN
-- [ ] **PKG-04**: TypeScript declarations published under `types/index.d.ts`
-- [ ] **PKG-05**: `package.json` `exports` map has nested `types` per condition (import/require) **[research]**
-- [ ] **PKG-06**: No global `window` pollution; UMD opt-in via `window.OpenBuroClient` only when used as `<script>`
-- [ ] **PKG-07**: Target: ES2020+; verified for Chrome 90+, Firefox 88+, Safari 14+
-- [ ] **PKG-08**: Capability-author integration guide documents required Penpal v7 compatibility **[research]**
+- [x] **PKG-01**: ESM build output `dist/obc.esm.js`
+- [x] **PKG-02**: CommonJS build output `dist/obc.cjs.js`
+- [x] **PKG-03**: UMD build output `dist/obc.umd.js` — importable via `<script>` from a CDN
+- [x] **PKG-04**: TypeScript declarations published under `types/index.d.ts`
+- [x] **PKG-05**: `package.json` `exports` map has nested `types` per condition (import/require) **[research]**
+- [x] **PKG-06**: No global `window` pollution; UMD opt-in via `window.OpenBuroClient` only when used as `<script>`
+- [x] **PKG-07**: Target: ES2020+; verified for Chrome 90+, Firefox 88+, Safari 14+
+- [x] **PKG-08**: Capability-author integration guide documents required Penpal v7 compatibility **[research]**
 
 ### Quality Gates
 
-- [ ] **QA-01**: Unit tests for resolver mime-matching rules (wildcard, exact, absent filter)
-- [ ] **QA-02**: Unit tests for `planCast()` discriminated union branches
-- [ ] **QA-03**: Unit tests for UUID generation and the `getRandomValues` fallback path
-- [ ] **QA-04**: Unit tests for WebSocket backoff + `destroyed` guard
-- [ ] **QA-05**: Unit tests for modal focus trap, ESC key, backdrop click
-- [ ] **QA-06**: Integration test (happy-dom + `MockBridge`): full `castIntent` happy path
-- [ ] **QA-07**: Integration test: two concurrent sessions route results to the correct callbacks
-- [ ] **QA-08**: Integration test: `destroy()` leaves zero listeners, closed WS, zero OBC DOM nodes
-- [ ] **QA-09**: Integration test: same-origin capability path rejected at cast time
-- [ ] **QA-10**: `@arethetypeswrong/cli --pack` passes in CI before publish
+- [x] **QA-01**: Unit tests for resolver mime-matching rules (wildcard, exact, absent filter)
+- [x] **QA-02**: Unit tests for `planCast()` discriminated union branches
+- [x] **QA-03**: Unit tests for UUID generation and the `getRandomValues` fallback path
+- [x] **QA-04**: Unit tests for WebSocket backoff + `destroyed` guard
+- [x] **QA-05**: Unit tests for modal focus trap, ESC key, backdrop click
+- [x] **QA-06**: Integration test (happy-dom + `MockBridge`): full `castIntent` happy path
+- [x] **QA-07**: Integration test: two concurrent sessions route results to the correct callbacks
+- [x] **QA-08**: Integration test: `destroy()` leaves zero listeners, closed WS, zero OBC DOM nodes
+- [x] **QA-09**: Integration test: same-origin capability path rejected at cast time
+- [x] **QA-10**: `@arethetypeswrong/cli --pack` passes in CI before publish
 
 ## v2 Requirements
 
@@ -246,24 +246,24 @@ Explicitly excluded. Documented to prevent scope creep.
 | ORCH-04 | Phase 3 | Complete |
 | ORCH-05 | Phase 3 | Complete |
 | ORCH-06 | Phase 3 | Complete |
-| PKG-01 | Phase 4 | Pending |
-| PKG-02 | Phase 4 | Pending |
-| PKG-03 | Phase 4 | Pending |
-| PKG-04 | Phase 4 | Pending |
-| PKG-05 | Phase 4 | Pending |
-| PKG-06 | Phase 4 | Pending |
-| PKG-07 | Phase 4 | Pending |
-| PKG-08 | Phase 4 | Pending |
-| QA-01 | Phase 4 | Pending |
-| QA-02 | Phase 4 | Pending |
-| QA-03 | Phase 4 | Pending |
-| QA-04 | Phase 4 | Pending |
-| QA-05 | Phase 4 | Pending |
-| QA-06 | Phase 4 | Pending |
-| QA-07 | Phase 4 | Pending |
-| QA-08 | Phase 4 | Pending |
-| QA-09 | Phase 4 | Pending |
-| QA-10 | Phase 4 | Pending |
+| PKG-01 | Phase 4 | Complete |
+| PKG-02 | Phase 4 | Complete |
+| PKG-03 | Phase 4 | Complete |
+| PKG-04 | Phase 4 | Complete |
+| PKG-05 | Phase 4 | Complete |
+| PKG-06 | Phase 4 | Complete |
+| PKG-07 | Phase 4 | Complete |
+| PKG-08 | Phase 4 | Complete |
+| QA-01 | Phase 4 | Complete |
+| QA-02 | Phase 4 | Complete |
+| QA-03 | Phase 4 | Complete |
+| QA-04 | Phase 4 | Complete |
+| QA-05 | Phase 4 | Complete |
+| QA-06 | Phase 4 | Complete |
+| QA-07 | Phase 4 | Complete |
+| QA-08 | Phase 4 | Complete |
+| QA-09 | Phase 4 | Complete |
+| QA-10 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements listed: 88 total (71 base + 17 [research] additions folded in during research phase)

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-01-orchestrator-PLAN.md; Phase 3 gate cleared; 147 tests green; OpenBuroClient exported from @openburo/client
-last_updated: "2026-04-10T11:33:56.244Z"
+stopped_at: Completed 04-01-distribution-PLAN.md; Phase 4 gate cleared; 147 tests green; attw clean; @openburo/client v0.1.0 distribution ready
+last_updated: "2026-04-10T11:46:57.928Z"
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** A host app can call `obc.castIntent(intent, cb)` once and get a fully orchestrated file-picker / file-save flow — capability discovery, user selection, sandboxed iframe lifecycle, and PostMessage round-trip — with zero framework lock-in.
-**Current focus:** Phase 03 — orchestration
+**Current focus:** Phase 04 — distribution-quality
 
 ## Current Position
 
-Phase: 03 (orchestration) — EXECUTING
+Phase: 04 (distribution-quality) — EXECUTING
 Plan: 1 of 1
 
 ## Performance Metrics
@@ -52,6 +52,7 @@ Plan: 1 of 1
 | Phase 02-core-implementation P01 | 11 | 4 tasks | 9 files |
 | Phase 02-core-implementation P05 | 5 | 1 tasks | 2 files |
 | Phase 03-orchestration P01 | 17 | 5 tasks | 8 files |
+| Phase 04 P01 | 15 | 5 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,8 @@ Recent decisions affecting current work:
 - [Phase 02-01]: WS-05 destroyed guard in 3 locations: start(), top of connect(), and top of setTimeout callback
 - [Phase 02-core-implementation]: Biome organizeImports reorders exports alphabetically within sections; comments separate logical layer groups
 - [Phase 03-orchestration]: Post-destroy castIntent rejects as Promise (async fn) not sync throw; window.happyDOM.settings scoped to client.test.ts beforeEach to avoid penpal-bridge breakage; watchdog test uses 50ms real timer instead of fake timers
+- [Phase 04]: docs/ excluded from npm package files field — integration guide lives in repo only, not in the tarball
+- [Phase 04]: QA-09 same-origin test was already committed in Phase 3 and counted in the 147 passing tests
 
 ### Pending Todos
 
@@ -91,6 +94,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:31:25.766Z
-Stopped at: Completed 03-01-orchestrator-PLAN.md; Phase 3 gate cleared; 147 tests green; OpenBuroClient exported from @openburo/client
+Last session: 2026-04-10T11:46:57.924Z
+Stopped at: Completed 04-01-distribution-PLAN.md; Phase 4 gate cleared; 147 tests green; attw clean; @openburo/client v0.1.0 distribution ready
 Resume file: None
