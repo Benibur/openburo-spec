@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/openburo/openburo-server/internal/registry"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,4 +41,38 @@ func TestEventPayload_OmitemptyCapabilities(t *testing.T) {
 	raw := string(newRegistryUpdatedEvent("mail-app", changeAdded))
 	require.False(t, strings.Contains(raw, `"capabilities"`),
 		"upsert event must not include capabilities field: %s", raw)
+}
+
+func TestNewSnapshotEvent(t *testing.T) {
+	caps := []registry.CapabilityView{
+		{
+			AppID:   "mail-app",
+			AppName: "Mail",
+			Action:  "PICK",
+			Path:    "/pick",
+			Properties: registry.CapabilityProps{
+				MimeTypes: []string{"text/plain"},
+			},
+		},
+	}
+	raw := newSnapshotEvent(caps)
+	var evt registryUpdatedEvent
+	require.NoError(t, json.Unmarshal(raw, &evt))
+	require.Equal(t, "REGISTRY_UPDATED", evt.Event)
+	require.Equal(t, changeSnapshot, evt.Payload.Change)
+	require.Len(t, evt.Payload.Capabilities, 1)
+	require.Equal(t, "mail-app", evt.Payload.Capabilities[0].AppID)
+	// appId omitted on snapshot events
+	require.Empty(t, evt.Payload.AppID)
+	// Timestamp parses
+	_, err := time.Parse("2006-01-02T15:04:05.000Z07:00", evt.Timestamp)
+	require.NoError(t, err)
+}
+
+func TestNewSnapshotEvent_EmptyList(t *testing.T) {
+	raw := string(newSnapshotEvent([]registry.CapabilityView{}))
+	// Must NOT be "null" for the capabilities field — clients do
+	// `state = event.payload.capabilities` and expect an array.
+	require.Contains(t, raw, `"capabilities":[]`)
+	require.NotContains(t, raw, `"capabilities":null`)
 }
