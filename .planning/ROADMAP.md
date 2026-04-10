@@ -29,12 +29,12 @@ OpenBuro Server is a Go 1.26 single-binary capability broker: the reference impl
   2. The binary starts when given `config.yaml` and `credentials.yaml`, logs a structured startup banner with version/listen-addr/TLS/ping-interval/registry-path, and responds `200 OK` to `GET /health` without auth
   3. A developer can copy `config.example.yaml` and `credentials.example.yaml` from the repo root, run the binary, and reach `/health` in under a minute
   4. CI runs `go test ./... -race`, `go vet`, and `gofmt -l` checks and all pass on the skeleton
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD (scaffold module, layout, deps, CI)
-- [ ] 01-02: TBD (config + credentials loaders, example files)
-- [ ] 01-03: TBD (slog setup, /health, startup banner)
+- [ ] 01-01-scaffold-deps-ci-PLAN.md — Initialize Go module, four-package internal/ layout, Makefile, .gitignore, GitHub Actions CI
+- [ ] 01-02-config-examples-PLAN.md — internal/config package (Config types, Load, validate) + testdata fixtures + config/credentials example YAMLs
+- [ ] 01-03-slog-health-banner-PLAN.md — internal/httpapi Server + /health handler + cmd/server/main.go compose-root with injected slog logger and 10-key startup banner
 
 ### Phase 2: Registry Core
 **Goal**: A pure domain package (`internal/registry`) owning manifest validation, thread-safe in-memory state, atomic file persistence, and symmetric MIME matching — independently testable with zero transport dependencies.
