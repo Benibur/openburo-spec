@@ -16,7 +16,9 @@ import (
 
 	"github.com/openburo/openburo-server/internal/config"
 	"github.com/openburo/openburo-server/internal/httpapi"
+	"github.com/openburo/openburo-server/internal/registry"
 	"github.com/openburo/openburo-server/internal/version"
+	"github.com/openburo/openburo-server/internal/wshub"
 )
 
 func main() {
@@ -53,7 +55,29 @@ func run() error {
 		"log_level", cfg.Logging.Level,
 	)
 
-	srv := httpapi.New(logger)
+	// Phase 4 Plan 04-01 expanded httpapi.New's signature to require the
+	// Phase 2 registry store, the Phase 3 websocket hub, a Credentials
+	// table, and a Config. Phase 5 will replace this minimal wiring with
+	// full compose-root wiring (graceful shutdown, LoadCredentials from
+	// cfg.CredentialsFile, two-phase Close). For now we construct just
+	// enough so the binary compiles and the Phase 1 /health endpoint still
+	// serves under the new middleware chain.
+	store, err := registry.NewStore(cfg.RegistryFile)
+	if err != nil {
+		return fmt.Errorf("load registry: %w", err)
+	}
+	hub := wshub.New(logger, wshub.Options{
+		PingInterval: cfg.WebSocket.PingInterval,
+	})
+	defer hub.Close()
+
+	srv, err := httpapi.New(logger, store, hub, httpapi.Credentials{}, httpapi.Config{
+		AllowedOrigins: cfg.CORS.AllowedOrigins,
+		WSPingInterval: cfg.WebSocket.PingInterval,
+	})
+	if err != nil {
+		return fmt.Errorf("build httpapi server: %w", err)
+	}
 	httpSrv := &http.Server{
 		Addr:    cfg.Server.Addr(),
 		Handler: srv.Handler(),
