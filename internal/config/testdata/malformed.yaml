@@ -1,0 +1,6 @@
+server:
+  port: 8080
+  tls:
+    enabled: false
+credentials_file: "./credentials.yaml
+registry_file: "./registry.json"
