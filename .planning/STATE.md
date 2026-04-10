@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-03-registry-handlers-PLAN.md
-last_updated: "2026-04-10T13:19:49Z"
+stopped_at: Completed 04-04-capabilities-ws-PLAN.md
+last_updated: "2026-04-10T13:37:44.045Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 ## Current Position
 
 Phase: 04 (http-api) — EXECUTING
-Plan: 4 of 5 (Plans 04-01, 04-02, 04-03 complete)
+Plan: 5 of 5 (Plans 04-01, 04-02, 04-03, 04-04 complete)
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Plan: 4 of 5 (Plans 04-01, 04-02, 04-03 complete)
 | Phase 04-http-api P01 | 5min | 2 tasks | 8 files |
 | Phase 04-http-api P02 | 7min | 3 tasks (chore + TDD RED/GREEN) | 10 files (2 prod, 2 test, 3 fixtures, 1 modified, 2 go.mod/sum) |
 | Phase 04-http-api P03 | 7min | 2 tasks (TDD RED/GREEN) | 6 files (2 prod, 2 test, 2 modified) |
+| Phase 04-http-api P04 | 8min | 2 tasks (TDD RED/GREEN) tasks | 6 files (1 prod, 1 test, 4 modified) files |
 
 ## Accumulated Context
 
@@ -129,6 +130,10 @@ Recent decisions affecting current work:
 - [Phase 04-http-api]: Plan 04-03: API-11 body hygiene pattern — defer r.Body.Close() in every handler + http.MaxBytesReader(w, r.Body, 1<<20) on POST + json.Decoder.DisallowUnknownFields. TestHandlers_BodyClosed does 3 sequential POSTs on the same client (forces connection reuse); TestHandleRegistryUpsert_BodyTooLarge posts 2 MiB and expects 400
 - [Phase 04-http-api]: Plan 04-03: 201-vs-200 on upsert is advisory, not linearizable — the existence check runs OUTSIDE the store's mutex and may observe stale state under concurrent Delete; the API-01 contract only requires the status code to be one of {201, 200} on success, not which one in the face of races
 - [Phase 04-http-api]: Plan 04-03: [Rule 1 deviation] go vet caught `r, _ := ts.Client().Get(...)` in TestHandleRegistryDelete_Existing; fix was a single-line `, _ :=` -> `, err := ... require.NoError(t, err)` correction in test code. Plan's production code specs were byte-accurate — the only drift was one test line vet flagged
+- [Phase 04-http-api]: Plan 04-04: Separate snapshotPayload type rather than reusing eventPayload for SNAPSHOT — Go json omitempty drops empty slices (len==0), not just nil; fix is a dedicated struct without omitempty on Capabilities so SNAPSHOT events always emit `"capabilities":[]` and never null. Two payload types share identical wire shape when populated; only zero-value serialization differs
+- [Phase 04-http-api]: Plan 04-04: [Rule 1 deviation] statusCapturingWriter did not implement http.Hijacker, silently breaking every WebSocket upgrade since Plan 04-01. coder/websocket.Accept asserts w.(http.Hijacker) and writes 501 on failure. Fix: 15-line Hijack() shim forwarding to inner writer and promoting status to 101. Generalizable rule: ResponseWriter wrappers in middleware MUST forward http.Hijacker (and Flusher/Pusher) or they'll silently break downstream upgrade handlers
+- [Phase 04-http-api]: Plan 04-04: Snapshot-before-subscribe (WS-06) enforced both behaviorally and statically — conn.Write(snapshot) at line 17 of handleCapabilitiesWS body precedes s.hub.Subscribe(r.Context(), conn) at line 28. WS-06 ordering is mechanically auditable via awk+grep, same pattern Plan 04-03 used for mutation-then-broadcast
+- [Phase 04-http-api]: Plan 04-04: Deleted stub501 entirely; all 6 Phase 4 routes now real. `grep -c stub501 server.go → 0` is a negative invariant for Plan 04-05. The InsecureSkipVerify grep gate tripped on our own doc comments referencing the knob by name — rule: always grep-check comments before committing gate-sensitive files (4th instance across phases). Fix: reword to 'origin-skip knob'
 
 ### Critical Research Flags (must land in first commit of their phase)
 
@@ -147,6 +152,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T13:19:49Z
-Stopped at: Completed 04-03-registry-handlers-PLAN.md
+Last session: 2026-04-10T13:37:15.588Z
+Stopped at: Completed 04-04-capabilities-ws-PLAN.md
 Resume file: None

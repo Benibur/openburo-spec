@@ -58,7 +58,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 - [x] **API-02**: `DELETE /api/v1/registry/{appId}` deletes a manifest — returns `204 No Content`, `404 Not Found`, or `401 Unauthorized`
 - [x] **API-03**: `GET /api/v1/registry` returns all manifests with `{ manifests: [...], count: N }` shape
 - [x] **API-04**: `GET /api/v1/registry/{appId}` returns one manifest or `404 Not Found`
-- [ ] **API-05**: `GET /api/v1/capabilities` returns aggregated capabilities with `{ capabilities: [...], count: N }` shape, supporting `?action=` and `?mimeType=` query params
+- [x] **API-05**: `GET /api/v1/capabilities` returns aggregated capabilities with `{ capabilities: [...], count: N }` shape, supporting `?action=` and `?mimeType=` query params
 - [x] **API-06**: Routes are registered using Go 1.22+ `http.ServeMux` method patterns (no third-party router)
 - [x] **API-07**: Middleware chain wraps handlers in order: recover → log → CORS → (per-route) auth
 - [x] **API-08**: Panic recovery middleware catches handler panics, logs them, returns `500 Internal Server Error`, and keeps the server alive
@@ -68,12 +68,12 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 
 ### WebSocket
 
-- [ ] **WS-01**: `GET /api/v1/capabilities/ws` upgrades to WebSocket using `coder/websocket`
+- [x] **WS-01**: `GET /api/v1/capabilities/ws` upgrades to WebSocket using `coder/websocket`
 - [x] **WS-02**: Centralized hub pattern: `Hub` holds subscribers map under a mutex, `subscriber` has a buffered outbound channel (default 16)
 - [x] **WS-03**: Non-blocking fan-out: publishing to a slow subscriber whose buffer is full triggers `closeSlow` (drop the client) rather than blocking the publisher
 - [x] **WS-04**: Each subscriber calls `conn.CloseRead(ctx)` so control frames are handled and closed clients are detected (prevents goroutine leaks)
 - [x] **WS-05**: Every mutation (upsert, delete) broadcasts a `REGISTRY_UPDATED` event with `{ event, timestamp, payload: { appId, change: ADDED|UPDATED|REMOVED } }`
-- [ ] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
+- [x] **WS-06**: On connect, the new subscriber receives a full-state `REGISTRY_UPDATED` snapshot before any subsequent events (eliminates connect-then-fetch race)
 - [x] **WS-07**: Periodic ping frames keep connections alive (default 30s, configurable from `config.yaml`)
 - [ ] **WS-08**: WebSocket origin checking uses `AcceptOptions.OriginPatterns` sourced from the same allow-list as CORS; `InsecureSkipVerify` never appears in production code
 - [x] **WS-09**: Broadcast is triggered by the HTTP handler layer **after** the registry mutation succeeds — the registry package never imports the wshub package (enforced by design to prevent ABBA deadlock)
@@ -188,19 +188,19 @@ Populated during roadmap creation on 2026-04-09.
 | API-02 | Phase 4 | Complete |
 | API-03 | Phase 4 | Complete |
 | API-04 | Phase 4 | Complete |
-| API-05 | Phase 4 | Pending |
+| API-05 | Phase 4 | Complete |
 | API-06 | Phase 4 | Complete |
 | API-07 | Phase 4 | Complete |
 | API-08 | Phase 4 | Complete |
 | API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Complete |
 | API-11 | Phase 4 | Complete |
-| WS-01 | Phase 4 | Pending |
+| WS-01 | Phase 4 | Complete |
 | WS-02 | Phase 3 | Complete |
 | WS-03 | Phase 3 | Complete |
 | WS-04 | Phase 3 | Complete |
 | WS-05 | Phase 4 | Complete |
-| WS-06 | Phase 4 | Pending |
+| WS-06 | Phase 4 | Complete |
 | WS-07 | Phase 3 | Complete |
 | WS-08 | Phase 4 | Pending |
 | WS-09 | Phase 4 | Complete |

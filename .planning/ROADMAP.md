@@ -103,7 +103,7 @@ Plans:
 - [ ] 04-01-server-middleware-PLAN.md — Server struct expansion, Config type, validated New (*Server, error), middleware chain (recover -> log -> cors -> mux), error envelope helpers, 501 route stubs (API-06..11)
 - [ ] 04-02-auth-credentials-PLAN.md — Credentials type + LoadCredentials (bcrypt cost >= 12), timing-safe authBasic middleware (dummyHash + subtle.ConstantTimeCompare), PII guard (AUTH-01..05, TEST-06)
 - [ ] 04-03-registry-handlers-PLAN.md — REST handlers (upsert/delete/list/get) + events.go + mutation-then-broadcast + audit log (API-01..04, WS-05, WS-09, OPS-06)
-- [ ] 04-04-capabilities-ws-PLAN.md — handleCapabilities + handleCapabilitiesWS + buildFullStateSnapshot + WS upgrade with snapshot-on-connect (API-05, WS-01, WS-06)
+- [x] 04-04-capabilities-ws-PLAN.md — handleCapabilities + handleCapabilitiesWS + buildFullStateSnapshot + WS upgrade with snapshot-on-connect (API-05, WS-01, WS-06)
 - [ ] 04-05-cors-integration-tests-PLAN.md — rs/cors wiring + REST round-trip + WS round-trip + WS origin rejection + full Phase 4 gate sweep (OPS-01, WS-08, TEST-02, TEST-05, TEST-06)
 
 ### Phase 5: Wiring, Shutdown & Polish
@@ -138,7 +138,7 @@ Phases execute in numeric order with Phase 2 and Phase 3 eligible for parallel e
 | 1. Foundation | 3/3 | Complete | 2026-04-10 |
 | 2. Registry Core | 0/3 | Not started | - |
 | 3. WebSocket Hub | 0/3 | Not started | - |
-| 4. HTTP API | 0/5 | Not started | - |
+| 4. HTTP API | 4/5 | In Progress | - |
 | 5. Wiring, Shutdown & Polish | 0/3 | Not started | - |
 
 ---
