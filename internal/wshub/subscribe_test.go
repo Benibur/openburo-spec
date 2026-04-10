@@ -89,3 +89,48 @@ func TestSubscribe_NoGoroutineLeak(t *testing.T) {
 	}, 2*time.Second, 20*time.Millisecond,
 		"goroutines did not drain after 1000 disconnect cycles")
 }
+
+// TestSubscribe_PingKeepsAlive asserts that a connected subscriber stays
+// registered across many ping intervals with no inbound or outbound data
+// traffic. If the ping loop were broken (PITFALLS #9: Ping requires a
+// concurrent reader — CloseRead provides it), the subscriber would be
+// dropped and h.subscribers would shrink to 0.
+//
+// We use require.Never (not require.Eventually) to assert the condition
+// "len(h.subscribers) == 0" NEVER becomes true across 300ms — at a
+// PingInterval of 10ms, that's 30+ ping cycles of aliveness.
+func TestSubscribe_PingKeepsAlive(t *testing.T) {
+	hub := New(testLogger(t), Options{PingInterval: 10 * time.Millisecond})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		_ = hub.Subscribe(r.Context(), conn)
+	}))
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	conn, _, err := websocket.Dial(ctx, srv.URL, nil)
+	require.NoError(t, err)
+	defer conn.CloseNow()
+
+	// Wait until the subscriber is registered.
+	require.Eventually(t, func() bool {
+		hub.mu.Lock()
+		defer hub.mu.Unlock()
+		return len(hub.subscribers) == 1
+	}, time.Second, 10*time.Millisecond)
+
+	// Across 300ms (30+ ping cycles), the subscriber must stay
+	// registered. If Ping silently blocks because CloseRead is missing
+	// or PingTimeout is ignored, this assertion fails.
+	require.Never(t, func() bool {
+		hub.mu.Lock()
+		defer hub.mu.Unlock()
+		return len(hub.subscribers) == 0
+	}, 300*time.Millisecond, 20*time.Millisecond,
+		"ping keepalive failed — subscriber was dropped during idle period")
+}
