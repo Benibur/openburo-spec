@@ -14,7 +14,13 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — greenfield library)
+**Foundations (Phase 1)** — tooling, types, and session-id utility in place; other phases can build on them.
+- ✓ Scaffold: tsdown + TS 6 + Vitest 4 + Biome 2.4, pnpm workspace — validated in Phase 1
+- ✓ `OBCError` + all six `OBCErrorCode` values (incl. `SAME_ORIGIN_CAPABILITY`) — validated in Phase 1
+- ✓ Shared types exported from barrel (`Capability`, `IntentRequest`, `IntentResult`, `FileResult`, `IntentCallback`, `OBCOptions`, `CastPlan`) — validated in Phase 1
+- ✓ `generateSessionId()` with tested `getRandomValues` fallback — validated in Phase 1
+- ✓ `penpal@7.0.6` pinned exact (no caret) — validated in Phase 1
+- ✓ `@arethetypeswrong/cli --pack` CI gate green across node10/node16 CJS+ESM/bundler — validated in Phase 1
 
 ### Active
 
@@ -120,4 +126,4 @@ A host app can write `obc.castIntent(intent, cb)` once and get a fully orchestra
 | Library package name: `@openburo/client` | Matches ecosystem branding; scoped npm package | — Pending |
 
 ---
-*Last updated: 2026-04-10 after initialization*
+*Last updated: 2026-04-10 after Phase 1 (Foundations) completion*
