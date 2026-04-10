@@ -38,10 +38,23 @@ Phase 1 shipped `httpapi.New(logger *slog.Logger) *Server` wired with `/health` 
 // New constructs a Server with all domain and transport dependencies.
 // The compose-root (cmd/server/main.go in Phase 5) is the only caller.
 //
-// All dependencies are required; nil values for any of store, hub, creds,
-// or logger panic at construction (no silent slog.Default fallback).
-func New(logger *slog.Logger, store *registry.Store, hub *wshub.Hub, creds Credentials, cfg Config) *Server
+// All dependencies are required; nil values for any of store, hub, or logger
+// panic at construction (no silent slog.Default fallback).
+//
+// Returns (*Server, error) — not just *Server — because Phase 4 research
+// revealed that rs/cors v1.11.1 does NOT reject the `AllowedOrigins: ["*"]
+// + AllowCredentials: true` combination at construction time. The Server
+// constructor does that validation itself and surfaces a clear error if
+// the operator misconfigures cors.allowed_origins. Empty allow-list also
+// returns an error (fail-fast — see "CORS middleware" below).
+func New(logger *slog.Logger, store *registry.Store, hub *wshub.Hub, creds Credentials, cfg Config) (*Server, error)
 ```
+
+**Validation performed by `New`:**
+1. `logger`, `store`, `hub` nil → panic (programmer error)
+2. `cfg.AllowedOrigins` is empty → `errors.New("httpapi: cfg.AllowedOrigins is empty (no CORS allow-list; WebSocket handshakes would be rejected)")`
+3. `cfg.AllowedOrigins` contains `"*"` → `errors.New("httpapi: cfg.AllowedOrigins contains \"*\" which is incompatible with AllowCredentials=true (PITFALLS #9)")`
+4. Each entry in `cfg.AllowedOrigins` fails a `path.Match` probe (same matcher `coder/websocket` uses for `OriginPatterns`) → wrap and return the pattern + underlying error
 
 Where:
 - `store` is the Phase 2 Registry (*registry.Store)
@@ -665,9 +678,11 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 
 **Critical:** `AllowedOrigins` is the same slice passed into `websocket.AcceptOptions.OriginPatterns`. The allow-list is **shared** — a browser client that can call the REST API can also connect to the WebSocket endpoint.
 
-**`AllowCredentials: true` combined with `AllowedOrigins: ["*"]` is rejected by rs/cors at construction time** (as of rs/cors v1.11.x). This is a good thing — prevents the PITFALLS #9 footgun. The planner should NOT attempt to bypass this; if the operator sets `allowed_origins: ["*"]` in config.yaml, the constructor panics with a clear message.
+**`AllowCredentials: true` combined with `AllowedOrigins: ["*"]` is NOT rejected by rs/cors v1.11.1** — the library silently emits both headers and relies on browsers to reject. **Research correction (2026-04-10):** the Server constructor performs this validation itself and returns an error if the combination is detected. See the `New` validation list above.
 
 **Allow-list fallback:** if the operator leaves `allowed_origins: []` empty in config.yaml, the Server constructor returns an error. Phase 5's main.go surfaces that error and refuses to start. Rationale: empty allow-list means all WebSocket connections would be rejected anyway (since `AcceptOptions.OriginPatterns` would be empty), so failing fast at startup is operator-friendly.
+
+**`OriginPatterns` matching semantics** (from `coder/websocket` v1.8.14 source `accept.go:243-264`): uses `path.Match` glob syntax, case-insensitive. Patterns containing `://` match `scheme://host`; bare patterns match host only. Same-host requests bypass the check entirely via `strings.EqualFold(r.Host, u.Host)`. Empty `Origin` header is always allowed (CLI clients). The WS origin-rejection test in plan 04-05 MUST set `DialOptions.HTTPHeader["Origin"]` to a host different from `ts.URL`'s host — e.g. `"https://evil.example"` — otherwise the same-host bypass auto-passes the test.
 
 ### Package layout
 
