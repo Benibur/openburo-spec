@@ -20,6 +20,7 @@ Requirements for the reference implementation. Each maps to exactly one roadmap 
 ### Registry
 
 - [x] **REG-01**: `Manifest` domain type validates required fields (`id`, `name`, `url`, `version`, non-empty `capabilities[]`)
+  - `capabilities[].path` accepts either a relative path (`/foo/bar`, resolved by the client against `manifest.url`) or an absolute `http(s)` URL (for providers whose capability endpoints live on a different host than their manifest URL). Bare words, non-http schemes, and URLs with empty host are rejected.
 - [x] **REG-02**: `capabilities[].action` is validated against the enum `PICK | SAVE`
 - [x] **REG-03**: `capabilities[].properties.mimeTypes` must be a non-empty list; MIME strings canonicalized (lowercased, parameters stripped)
 - [x] **REG-04**: In-memory `Store` guards all state with `sync.RWMutex`; mutations serialize, reads parallelize

@@ -412,7 +412,8 @@ Run `go test ./internal/registry -run 'TestMimeMatch|TestCanonicalizeMIME' -coun
   13. empty action → `capability[0].action`
   14. action "pick" (wrong case) → `capability[0].action must be \"PICK\" or \"SAVE\", got \"pick\"`
   15. empty path → `capability[0].path is required`
-  16. path not starting with `/` → `capability[0].path must start with \"/\"`
+  16. path that is neither `/`-relative nor an absolute http(s) URL (e.g. bare word `pick`, `ftp://...`, `https://` with empty host) → `capability[0].path must start with \"/\" or be an absolute http(s) URL`
+  16b. absolute http(s) URL paths accepted — covered by a dedicated positive test `TestManifestValidate_AbsolutePathAccepted`
   17. path too long (>500) → `capability[0].path too long`
   18. empty mimeTypes slice → `capability[0].properties.mimeTypes must be non-empty`
   19. mimeType canonicalize failure (e.g. "image") → `capability[0].properties.mimeTypes[0]`
@@ -501,7 +502,9 @@ func TestManifestValidate_Errors(t *testing.T) {
 		{"empty action", mutate(func(m *Manifest) { m.Capabilities[0].Action = "" }), "capability[0].action"},
 		{"lowercase action rejected", mutate(func(m *Manifest) { m.Capabilities[0].Action = "pick" }), `capability[0].action must be "PICK" or "SAVE", got "pick"`},
 		{"empty path", mutate(func(m *Manifest) { m.Capabilities[0].Path = "" }), "capability[0].path is required"},
-		{"path without leading slash", mutate(func(m *Manifest) { m.Capabilities[0].Path = "pick" }), `capability[0].path must start with "/"`},
+		{"path is bare word rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "pick" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
+		{"path with non-http scheme rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "ftp://example.com/pick" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
+		{"path absolute URL missing host rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "https://" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
 		{"path too long", mutate(func(m *Manifest) { m.Capabilities[0].Path = longPath }), "capability[0].path too long"},
 		{"empty mimeTypes", mutate(func(m *Manifest) { m.Capabilities[0].Properties.MimeTypes = nil }), "capability[0].properties.mimeTypes must be non-empty"},
 		{"empty mimeTypes slice", mutate(func(m *Manifest) { m.Capabilities[0].Properties.MimeTypes = []string{} }), "capability[0].properties.mimeTypes must be non-empty"},
@@ -652,8 +655,15 @@ func (m *Manifest) Validate() error {
 		if c.Path == "" {
 			return fmt.Errorf("validate: capability[%d].path is required", i)
 		}
+		// Path may be either a relative path (starts with "/", resolved
+		// against Manifest.URL by the client) or an absolute http/https
+		// URL (for providers whose capability endpoints live on a
+		// different host than their manifest URL).
 		if !strings.HasPrefix(c.Path, "/") {
-			return fmt.Errorf("validate: capability[%d].path must start with \"/\"", i)
+			cu, err := url.Parse(c.Path)
+			if err != nil || (cu.Scheme != "http" && cu.Scheme != "https") || cu.Host == "" {
+				return fmt.Errorf("validate: capability[%d].path must start with \"/\" or be an absolute http(s) URL", i)
+			}
 		}
 		if len(c.Path) > maxCapabilityPathLen {
 			return fmt.Errorf("validate: capability[%d].path too long: %d chars (max %d)", i, len(c.Path), maxCapabilityPathLen)

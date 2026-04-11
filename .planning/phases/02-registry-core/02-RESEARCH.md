@@ -30,7 +30,7 @@
 - `version`: required, non-empty, max 64 chars, any printable ASCII
 - `capabilities`: required, non-empty slice
 - `capabilities[i].action`: required, exactly `"PICK"` or `"SAVE"` (case-sensitive)
-- `capabilities[i].path`: required, starts with `/`, max 500 chars
+- `capabilities[i].path`: required, max 500 chars; either starts with `/` (relative, resolved against `Manifest.URL`) OR is an absolute `http(s)` URL with non-empty host (provider on a different host than the manifest)
 - `capabilities[i].properties.mimeTypes`: required, non-empty, each canonicalized `type/subtype` with `*` allowed on either side. `*/subtype` is invalid. Parameters stripped. Case-folded to lowercase.
 
 **MIME matching (locked):** Symmetric 3×3 wildcard matching — `exact`, `type/*`, `*/*` on both sides. Matching is called on canonicalized inputs only. Canonicalization is applied at `Validate()` time (in place) and at query-parse time.
@@ -228,7 +228,7 @@ Mirror `internal/config/config.go`:
 | Atomic file write | `os.Create` + `Encode` + `Close` | `os.CreateTemp` in same dir + `Sync` + `Close` + `Rename` + dir fsync | PITFALLS #4 — the "obvious" path corrupts on crash. |
 | JSON serialization determinism | Pre-sort struct fields by hand | Struct with JSON tags — `encoding/json` writes struct fields in declaration order and map keys sorted | Go 1.12+ guarantees sorted map keys in `Marshal` output (verified at [pkg.go.dev/encoding/json#Marshal](https://pkg.go.dev/encoding/json#Marshal)). Combined with sorted manifests slice → byte-stable file. |
 | MIME parameter parsing | Regex or `mime.ParseMediaType` | A 10-line `strings.Index(s, ";")` split | `mime.ParseMediaType` is heavier than needed and *errors* on simple things like `text/*` with no parameters. Also brings RFC 2045 strictness that's inappropriate for a canonicalizer that should accept `type/subtype` wildcards. Hand-roll the trivial split — it's exactly the pseudocode in CONTEXT.md. |
-| Path validation for manifest `path` field | Regex or custom state machine | `strings.HasPrefix(p, "/")` + length check | Spec says "starts with /, max 500 chars" — that's two lines. No need for anything fancier. |
+| Path validation for manifest `path` field | Regex or custom state machine | `strings.HasPrefix(p, "/")` OR `url.Parse`-based http(s) URL check + length check | Spec says "relative path starting with / OR absolute http(s) URL, max 500 chars" — a leading-slash fast path plus a `url.Parse` fallback covers both cases in a handful of lines. |
 | Deep-copy of Manifest for Get/List returns | reflect-based cloning or hand-rolled | Plain struct assignment + `append([]T(nil), src...)` for slices | Value types without pointer fields copy correctly via `=`. Slices need an explicit append-to-nil to detach. |
 
 **Key insight:** This phase is small and stdlib-rich. Every "should I pull in X?" question should be answered with "no — write the 15 lines stdlib wants."
@@ -427,7 +427,7 @@ The planner needs a copy-paste catalog so tests can assert on exact substrings. 
 | `capabilities[i].action` | empty | `capability[%d].action is required` |
 | `capabilities[i].action` | not PICK or SAVE | `capability[%d].action must be "PICK" or "SAVE", got %q` |
 | `capabilities[i].path` | empty | `capability[%d].path is required` |
-| `capabilities[i].path` | doesn't start with / | `capability[%d].path must start with "/"` |
+| `capabilities[i].path` | neither `/`-relative nor absolute http(s) URL | `capability[%d].path must start with "/" or be an absolute http(s) URL` |
 | `capabilities[i].path` | too long (>500) | `capability[%d].path too long: N chars (max 500)` |
 | `capabilities[i].properties.mimeTypes` | nil or empty | `capability[%d].properties.mimeTypes must be non-empty` |
 | `capabilities[i].properties.mimeTypes[j]` | canonicalization failed | `capability[%d].properties.mimeTypes[%d]: <canonicalize error>` |

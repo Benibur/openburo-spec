@@ -38,6 +38,26 @@ func TestManifestValidate_CanonicalizesInPlace(t *testing.T) {
 	require.Equal(t, []string{"image/png", "text/plain"}, m.Capabilities[0].Properties.MimeTypes)
 }
 
+func TestManifestValidate_AbsolutePathAccepted(t *testing.T) {
+	cases := []struct {
+		name string
+		path string
+	}{
+		{"absolute http URL", "http://other-host.example/pick"},
+		{"absolute https URL", "https://provider.example.com/capabilities/PICK"},
+		{"absolute https URL with port and query", "https://provider.example.com:8443/browse/?id=42"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := validManifest()
+			m.Capabilities[0].Path = tc.path
+			require.NoError(t, m.Validate())
+			require.Equal(t, tc.path, m.Capabilities[0].Path,
+				"absolute URL path must be preserved byte-for-byte")
+		})
+	}
+}
+
 func TestManifestValidate_Errors(t *testing.T) {
 	mutate := func(fn func(*Manifest)) Manifest {
 		m := validManifest()
@@ -72,7 +92,9 @@ func TestManifestValidate_Errors(t *testing.T) {
 		{"empty action", mutate(func(m *Manifest) { m.Capabilities[0].Action = "" }), "capability[0].action"},
 		{"lowercase action rejected", mutate(func(m *Manifest) { m.Capabilities[0].Action = "pick" }), `capability[0].action must be "PICK" or "SAVE", got "pick"`},
 		{"empty path", mutate(func(m *Manifest) { m.Capabilities[0].Path = "" }), "capability[0].path is required"},
-		{"path without leading slash", mutate(func(m *Manifest) { m.Capabilities[0].Path = "pick" }), `capability[0].path must start with "/"`},
+		{"path is bare word rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "pick" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
+		{"path with non-http scheme rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "ftp://example.com/pick" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
+		{"path absolute URL missing host rejected", mutate(func(m *Manifest) { m.Capabilities[0].Path = "https://" }), `capability[0].path must start with "/" or be an absolute http(s) URL`},
 		{"path too long", mutate(func(m *Manifest) { m.Capabilities[0].Path = longPath }), "capability[0].path too long"},
 		{"empty mimeTypes", mutate(func(m *Manifest) { m.Capabilities[0].Properties.MimeTypes = nil }), "capability[0].properties.mimeTypes must be non-empty"},
 		{"empty mimeTypes slice", mutate(func(m *Manifest) { m.Capabilities[0].Properties.MimeTypes = []string{} }), "capability[0].properties.mimeTypes must be non-empty"},

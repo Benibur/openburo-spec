@@ -120,6 +120,7 @@ A client app can discover, at any moment, which other apps can fulfill a given i
 | Persist failure → in-memory rollback (error contains `"registry unchanged"`) | Prevents divergence between disk and memory state under disk-full / permission errors | ✓ Good — `TestStore_Upsert_PersistFailureRollsBack` landed in Phase 2 |
 | `NewStore` does NOT mkdir missing parent directory | Operator error (bad config) should surface on first write, not be silently papered over | ✓ Good — Phase 2, Open Question 4 |
 | Deleting a non-existent id is `(false, nil)` no-op with no disk write | Idempotent DELETE semantics; avoids spurious persist churn on retries | ✓ Good — Phase 2, Open Question 5 |
+| `capability.path` accepts absolute http(s) URLs in addition to `/`-relative paths | v1.0 shipped assuming every provider serves its capability endpoints on the same host as its manifest URL; the TechSprint-01 FilePicker registry revealed real providers split these across hosts. Widening the accepted input is strictly backward-compatible. | ✓ Good — hotfix 2026-04-11 (post-v1.0) |
 
 ---
 ## Current State

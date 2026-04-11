@@ -74,7 +74,7 @@ The planner should implement `Manifest.Validate()` returning a wrapped error per
 
 **Capability entries (`Manifest.Capabilities[i]`):**
 - `action`: required, **exactly** `"PICK"` or `"SAVE"` (case-sensitive; `pick` or `Pick` is rejected). Rationale: enum values are machine-readable constants.
-- `path`: required, non-empty, must start with `/`. Max 500 chars. The path is relative to `Manifest.URL` and is opened by the client.
+- `path`: required, non-empty, max 500 chars. May be either (a) a relative path starting with `/`, resolved by the client against `Manifest.URL`, or (b) an absolute `http` / `https` URL with a non-empty host, for providers whose capability endpoints live on a different host than their manifest URL (e.g. a manifest hosted on `https://app.example` whose PICK capability sits on `https://storage.example/browse`). Any other value — bare words, non-http schemes, URLs with empty host — is rejected.
 - `properties.mimeTypes`: required, non-empty slice. Each entry must match the loose pattern `type/subtype` with `*` allowed on either side (see MIME canonicalization below). Entries are **canonicalized** (lowercased, parameters stripped) during Validate — the stored form is already canonical so matching is a pure comparison.
 
 **Unknown fields in JSON input:** use `json.Decoder.DisallowUnknownFields()` in the HTTP handler (Phase 4 concern) so clients learn the exact shape. Phase 2's `Manifest` struct has explicit `json:"..."` tags so the decoder rejects misspelled fields.

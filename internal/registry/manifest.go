@@ -124,8 +124,15 @@ func (m *Manifest) Validate() error {
 		if c.Path == "" {
 			return fmt.Errorf("validate: capability[%d].path is required", i)
 		}
+		// Path may be either a relative path (starts with "/", resolved
+		// against Manifest.URL by the client) or an absolute http/https
+		// URL (for providers whose capability endpoints live on a
+		// different host than their manifest URL).
 		if !strings.HasPrefix(c.Path, "/") {
-			return fmt.Errorf("validate: capability[%d].path must start with \"/\"", i)
+			cu, err := url.Parse(c.Path)
+			if err != nil || (cu.Scheme != "http" && cu.Scheme != "https") || cu.Host == "" {
+				return fmt.Errorf("validate: capability[%d].path must start with \"/\" or be an absolute http(s) URL", i)
+			}
 		}
 		if len(c.Path) > maxCapabilityPathLen {
 			return fmt.Errorf("validate: capability[%d].path too long: %d chars (max %d)", i, len(c.Path), maxCapabilityPathLen)
