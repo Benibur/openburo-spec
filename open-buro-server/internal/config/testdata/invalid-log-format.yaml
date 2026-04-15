@@ -1,0 +1,13 @@
+server:
+  port: 8080
+  tls:
+    enabled: false
+credentials_file: "./credentials.yaml"
+registry_file: "./registry.json"
+websocket:
+  ping_interval_seconds: 30
+logging:
+  format: xml
+  level: info
+cors:
+  allowed_origins: []

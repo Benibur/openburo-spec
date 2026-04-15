@@ -1,0 +1,31 @@
+# OpenBuro Server — example configuration
+# Copy this file to config.yaml and edit to suit your deployment.
+
+server:
+  port: 8080
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+
+# Path to the credentials file (bcrypt-hashed admin passwords).
+# Loaded at startup; see credentials.example.yaml for the expected shape.
+credentials_file: "./credentials.yaml"
+
+# Path to the persistent registry store. Created on first write if absent.
+registry_file: "./registry.json"
+
+websocket:
+  # How often the server sends ping frames to keep connections alive.
+  ping_interval_seconds: 30
+
+logging:
+  # Format: "json" for production, "text" for local development.
+  format: json
+  # Level: debug | info | warn | error
+  level: info
+
+cors:
+  # Explicit allow-list of origins. Leave empty to block all browser clients.
+  # Shared with the WebSocket origin check in the API phase.
+  allowed_origins: []
